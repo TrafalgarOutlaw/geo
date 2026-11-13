@@ -22,6 +22,19 @@
     #q { font-size: 1.3rem; font-weight: 600; margin: 8px 0; }
     nav.toc { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 4px; }
     nav.toc a { font-size: 0.85rem; text-decoration: none; border: 1px solid var(--grid); border-radius: 999px; padding: 4px 10px; }
+    .dot1 { fill: var(--accent); }
+    .dot2 { fill: var(--accent2); }
+    .tri1 { fill: var(--fill); stroke: var(--accent); stroke-width: 1.5; }
+    .tri2 { fill: var(--fill2); stroke: var(--accent2); stroke-width: 1.5; }
+    .hyp { stroke: var(--accent2); stroke-width: 3.5; }
+    .curve { fill: none; stroke: var(--accent); stroke-width: 3; }
+    .curve2 { fill: none; stroke: var(--accent2); stroke-width: 3; }
+    .diag { stroke: var(--muted); stroke-width: 1.5; stroke-dasharray: 5 5; }
+    .target { fill: none; stroke: var(--ok); stroke-width: 2; stroke-dasharray: 6 4; }
+    .ax { stroke: var(--muted); stroke-width: 1.5; }
+    .layer { stroke: var(--accent); }
+    .lm { fill: var(--fg); font-size: 12px; }
+    .marker { fill: var(--accent2); }
   </style>
 </head>
 <body>
@@ -30,13 +43,14 @@
   <h1>Potenzen und Wurzeln</h1>
   <p class="lead">Klasse 9 Realschule. Verschieb die Regler und beobachte, was passiert.</p>
   <nav class="toc">
-    <a href="#potenz">1 Potenz</a><a href="#gesetze">2 Potenzgesetze</a><a href="#wurzel">3 Wurzeln</a>
-    <a href="#wgesetze">4 Wurzelgesetze</a><a href="#zehner">5 Zehnerpotenzen</a><a href="#ueben">6 Üben</a>
+    <a href="#potenz">Potenz</a><a href="#punkte">Punktmuster</a><a href="#falten">Papier falten</a><a href="#gesetze">Potenzgesetze</a>
+    <a href="#wurzel">Wurzeln</a><a href="#spirale">Wurzelspirale</a><a href="#heron">Heron</a><a href="#graphen">Graphen</a>
+    <a href="#wgesetze">Wurzelgesetze</a><a href="#zehner">Zehnerpotenzen</a><a href="#ueben">Üben</a>
   </nav>
 
   <!-- 1 -->
   <section class="card" id="potenz">
-    <h2>1 Was ist eine Potenz?</h2>
+    <h2>Was ist eine Potenz?</h2>
     <p>Eine Potenz <b>a<sup>n</sup></b> ist eine Kurzschreibweise: Die <span class="f1">Basis a</span> wird <span class="f2">n-mal</span> mit sich selbst multipliziert.</p>
     <label class="slider">Basis a = <b id="pa-v"></b><input type="range" id="pa" min="-5" max="10" value="2"></label>
     <label class="slider">Exponent n = <b id="pn-v"></b><input type="range" id="pn" min="-4" max="8" value="3"></label>
@@ -45,9 +59,28 @@
     <table class="steps" id="p-steps"></table>
   </section>
 
+
+  <section class="card" id="punkte">
+    <h2>Quadratzahlen als Punktmuster</h2>
+    <p>Jede Quadratzahl ist ein Quadrat aus Punkten. Zur nächsten kommt immer ein „Winkel“ aus der nächsten <b>ungeraden Zahl</b> dazu.</p>
+    <label class="slider">n = <b id="dn-v"></b><input type="range" id="dn" min="1" max="10" value="4"></label>
+    <svg class="board" id="dots-svg" viewBox="0 0 320 320" aria-label="Punktquadrat"></svg>
+    <div class="big" id="dots-out"></div>
+  </section>
+
+  <section class="card" id="falten">
+    <h2>Papier falten: Potenzen wachsen rasend schnell</h2>
+    <p>Ein Blatt Papier ist etwa 0,1 mm dick. Bei jedem Falten verdoppelt sich die Dicke. Nach k-mal Falten hat der Stapel <b>2<sup>k</sup></b> Lagen.</p>
+    <label class="slider">k = <b id="fk-v"></b> mal gefaltet<input type="range" id="fk" min="0" max="52" value="5"></label>
+    <div class="row"><button class="btn" id="fk-minus">− 1</button><button class="btn primary" id="fk-plus">Noch einmal falten</button></div>
+    <svg class="board" id="fold-svg" viewBox="0 0 340 300" aria-label="Papierstapel und Größenvergleich"></svg>
+    <div class="big" id="fk-out"></div>
+    <p class="muted" id="fk-hint"></p>
+  </section>
+
   <!-- 2 -->
   <section class="card" id="gesetze">
-    <h2>2 Potenzgesetze</h2>
+    <h2>Potenzgesetze</h2>
     <p>Wähle ein Gesetz. Die Faktoren zeigen, warum es stimmt.</p>
     <div class="chips" id="law-chips">
       <button data-law="mul" class="on">a<sup>m</sup>·a<sup>n</sup></button>
@@ -63,7 +96,7 @@
 
   <!-- 3 -->
   <section class="card" id="wurzel">
-    <h2>3 Quadratwurzel und Kubikwurzel</h2>
+    <h2>Quadratwurzel und Kubikwurzel</h2>
     <p>Die Quadratwurzel <b>√A</b> ist die Seitenlänge eines Quadrats mit dem Flächeninhalt A. Die Kubikwurzel <b>∛V</b> ist die Kantenlänge eines Würfels mit dem Volumen V.</p>
     <div class="chips" id="root-chips">
       <button data-mode="sq" class="on">Quadrat</button>
@@ -75,9 +108,43 @@
     <p class="muted" id="r-hint"></p>
   </section>
 
+
+  <section class="card" id="spirale">
+    <h2>Die Wurzelspirale</h2>
+    <p>Lege rechtwinklige Dreiecke mit einer Kathete der Länge 1 aneinander. Nach dem Satz des Pythagoras ist jede neue Hypotenuse die Wurzel der nächsten Zahl: √2, √3, √4, …</p>
+    <label class="slider">Anzahl Dreiecke = <b id="sp-v"></b><input type="range" id="sp" min="1" max="17" value="5"></label>
+    <svg class="board" id="spiral-svg" viewBox="0 0 340 340" aria-label="Wurzelspirale"></svg>
+    <div class="big" id="sp-out"></div>
+    <p class="muted" id="sp-hint"></p>
+  </section>
+
+  <section class="card" id="heron">
+    <h2>Heron-Verfahren: Aus einem Rechteck wird ein Quadrat</h2>
+    <p>Gesucht ist √A. Starte mit einem Rechteck der Fläche A (Seiten A und 1). Nimm als neue Seite den <b>Mittelwert</b> der beiden Seiten, die andere Seite wird so gewählt, dass die Fläche A bleibt. Das Rechteck wird immer quadratischer.</p>
+    <label class="slider">Flächeninhalt A = <b id="ha-v"></b><input type="range" id="ha" min="2" max="50" value="10"></label>
+    <div class="row"><button class="btn primary" id="h-step">Nächster Schritt</button><button class="btn" id="h-reset">Neu starten</button></div>
+    <svg class="board" id="heron-svg" viewBox="0 0 340 260" aria-label="Rechteck nähert sich dem Quadrat"></svg>
+    <table class="steps" id="h-table"></table>
+  </section>
+
+  <section class="card" id="graphen">
+    <h2>Graphen: Potenz und Wurzel als Spiegelbild</h2>
+    <p>Wähle eine Funktion und verschiebe den Punkt. Die Wurzelfunktion ist das Spiegelbild der Potenzfunktion an der Geraden y = x: Sie macht das Potenzieren rückgängig.</p>
+    <div class="chips" id="g-chips">
+      <button data-n="2" class="on">y = x²</button>
+      <button data-n="3">y = x³</button>
+      <button data-n="0.5">y = √x</button>
+      <button data-n="-1">y = x<sup>−1</sup></button>
+    </div>
+    <label class="slider">x = <b id="gx-v"></b><input type="range" id="gx" min="0" max="2" step="0.05" value="1.5"></label>
+    <label class="row"><input type="checkbox" id="g-mirror" checked style="width:20px;height:20px"> Spiegelbild an y = x zeigen</label>
+    <svg class="board" id="graph-svg" viewBox="0 0 340 340" aria-label="Funktionsgraph"></svg>
+    <div class="big" id="g-out" style="font-size:1.1rem"></div>
+  </section>
+
   <!-- 4 -->
   <section class="card" id="wgesetze">
-    <h2>4 Wurzelgesetze</h2>
+    <h2>Wurzelgesetze</h2>
     <div class="rule">√a · √b = √(a·b) &nbsp;&nbsp; z. B. √2 · √8 = √16 = 4</div>
     <div class="rule">√a : √b = √(a : b) &nbsp;&nbsp; z. B. √75 : √3 = √25 = 5</div>
     <div class="rule">√(a²) = |a| &nbsp;&nbsp; z. B. √((−3)²) = √9 = 3</div>
@@ -91,7 +158,7 @@
 
   <!-- 5 -->
   <section class="card" id="zehner">
-    <h2>5 Zehnerpotenzen und wissenschaftliche Schreibweise</h2>
+    <h2>Zehnerpotenzen und wissenschaftliche Schreibweise</h2>
     <p>Sehr große und sehr kleine Zahlen schreibt man als <b>Zahl zwischen 1 und 10 · 10<sup>k</sup></b>.</p>
     <label class="slider">k = <b id="zk-v"></b><input type="range" id="zk" min="-10" max="12" value="3"></label>
     <div class="big" id="zk-out"></div>
@@ -103,7 +170,7 @@
 
   <!-- 6 -->
   <section class="card" id="ueben">
-    <h2>6 Üben</h2>
+    <h2>Üben</h2>
     <div class="chips" id="ex-chips">
       <button data-t="all" class="on">Gemischt</button>
       <button data-t="pot">Potenzen</button>
@@ -390,6 +457,214 @@ $("check").addEventListener("click", check);
 $("next").addEventListener("click", newQ);
 $("ans").addEventListener("keydown", (e) => { if (e.key === "Enter") { answered ? newQ() : check(); } });
 newQ();
+
+/* ---------- Quadratzahlen als Punktmuster ---------- */
+function drawDots() {
+  const n = +$("dn").value, s = $("dots-svg");
+  $("dn-v").textContent = n;
+  s.innerHTML = "";
+  const G = 29;
+  for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) {
+    const k = Math.max(i, j);
+    const off = (320 - (n - 1) * G) / 2;
+    el("circle", { cx: off + j * G, cy: 320 - off - i * G, r: 9, class: k % 2 ? "dot2" : "dot1" }, s);
+  }
+  const terms = [];
+  for (let k = 0; k < n; k++) terms.push(`<span class="${k % 2 ? "f2" : "f1"}">${2 * k + 1}</span>`);
+  $("dots-out").innerHTML = `${terms.join(" + ")} = ${n}² = ${n * n}`;
+}
+$("dn").addEventListener("input", drawDots);
+drawDots();
+
+/* ---------- Papier falten ---------- */
+const landmarks = [
+  [0.0001, "ein Blatt Papier"], [0.03, "ein dickes Buch"], [1.8, "ein Mensch"],
+  [330, "der Eiffelturm"], [8849, "der Mount Everest"], [400000, "die Raumstation ISS"],
+  [3.844e8, "der Mond"], [1.496e11, "die Sonne"],
+];
+function fmtLen(m) {
+  if (m < 0.01) return de(m * 1000, 2) + " mm";
+  if (m < 1) return de(m * 100, 1) + " cm";
+  if (m < 1000) return de(m, 1) + " m";
+  return de(m / 1000, 0) + " km";
+}
+function drawFold() {
+  const k = +$("fk").value, s = $("fold-svg");
+  $("fk-v").textContent = k;
+  s.innerHTML = "";
+  const L = Math.pow(2, k), m = 0.0001 * L;
+  // Stapel links
+  const top = 20, H = 260, x0 = 20, W = 110;
+  if (L <= 64) {
+    const h = H / L;
+    for (let i = 0; i < L; i++) el("rect", { x: x0, y: top + H - (i + 1) * h + h * 0.15, width: W, height: Math.max(h * 0.7, 0.8), class: i % 2 ? "face2" : "face1", "stroke-width": L > 16 ? 0.5 : 1.5 }, s);
+  } else {
+    el("rect", { x: x0, y: top, width: W, height: H, class: "face1" }, s);
+    el("text", { x: x0 + W / 2, y: top + H / 2, class: "lm", "text-anchor": "middle" }, s).textContent = "zu viele Lagen";
+    el("text", { x: x0 + W / 2, y: top + H / 2 + 16, class: "lm", "text-anchor": "middle" }, s).textContent = "zum Zeichnen";
+  }
+  el("text", { x: x0 + W / 2, y: 296, class: "axis", "text-anchor": "middle" }, s).textContent = `${de(L, 0)} Lagen`;
+  // logarithmische Achse rechts
+  const ax = 175, lo = -4, hi = 12, Y = (v) => top + H - ((Math.log10(v) - lo) / (hi - lo)) * H;
+  el("line", { x1: ax, y1: top, x2: ax, y2: top + H, class: "ax" }, s);
+  for (let e = lo; e <= hi; e += 4) {
+    el("line", { x1: ax - 5, y1: Y(Math.pow(10, e)), x2: ax, y2: Y(Math.pow(10, e)), class: "ax" }, s);
+  }
+  landmarks.forEach(([v, name]) => {
+    const y = Y(v), passed = m >= v;
+    el("line", { x1: ax, y1: y, x2: ax + 8, y2: y, class: "ax" }, s);
+    const t = el("text", { x: ax + 12, y: y + 4, class: "lm" }, s);
+    t.textContent = name;
+    if (passed) t.setAttribute("font-weight", "700");
+  });
+  const ym = Math.max(top, Math.min(top + H, Y(m)));
+  el("circle", { cx: ax, cy: ym, r: 7, class: "marker" }, s);
+  el("text", { x: ax - 10, y: ym + 4, class: "lm", "text-anchor": "end" }, s).textContent = fmtLen(m);
+  $("fk-out").innerHTML = `2${sup(k)} = ${de(L, 0)} Lagen · 0,1 mm = ${fmtLen(m)}`;
+  const passed = landmarks.filter(([v]) => m >= v).pop();
+  const next = landmarks.find(([v]) => m < v);
+  let hint = passed && k > 0 ? `So dick wie oder dicker als ${passed[1]}. ` : "";
+  if (next) {
+    const need = Math.ceil(Math.log2(next[0] / 0.0001));
+    hint += `Bis ${next[1]} brauchst du ${need}-mal falten, also noch ${need - k}-mal.`;
+  } else hint += "Weiter als bis zur Sonne! In Wirklichkeit schafft man übrigens nur etwa 7-mal.";
+  $("fk-hint").textContent = hint;
+}
+$("fk").addEventListener("input", drawFold);
+$("fk-plus").addEventListener("click", () => { $("fk").value = Math.min(52, +$("fk").value + 1); drawFold(); });
+$("fk-minus").addEventListener("click", () => { $("fk").value = Math.max(0, +$("fk").value - 1); drawFold(); });
+drawFold();
+
+/* ---------- Wurzelspirale ---------- */
+function drawSpiral() {
+  const n = +$("sp").value, s = $("spiral-svg");
+  $("sp-v").textContent = n;
+  s.innerHTML = "";
+  const C = 170, U = 36, X = (p) => C + p[0] * U, Yc = (p) => C - p[1] * U;
+  const P = [null, [1, 0]];
+  for (let k = 1; k <= n; k++) {
+    const [x, y] = P[k], r = Math.hypot(x, y);
+    P[k + 1] = [x - y / r, y + x / r];
+  }
+  for (let k = 1; k <= n; k++) {
+    const pts = [[0, 0], P[k], P[k + 1]].map((p) => `${X(p)},${Yc(p)}`).join(" ");
+    el("polygon", { points: pts, class: k % 2 ? "tri1" : "tri2" }, s);
+  }
+  el("line", { x1: C, y1: C, x2: X(P[n + 1]), y2: Yc(P[n + 1]), class: "hyp" }, s);
+  for (let k = 2; k <= n + 1; k++) {
+    const [x, y] = P[k], r = Math.hypot(x, y), f = (r + 0.42) / r;
+    const t = el("text", { x: C + x * f * U, y: C - y * f * U + 4, class: "lm", "text-anchor": "middle" }, s);
+    const root = Math.sqrt(k);
+    t.textContent = Number.isInteger(root) ? `√${k}=${root}` : `√${k}`;
+    if (Number.isInteger(root)) t.setAttribute("font-weight", "700");
+  }
+  const v = Math.sqrt(n + 1);
+  $("sp-out").innerHTML = `Neue Hypotenuse: √${n + 1} ${Number.isInteger(v) ? "=" : "≈"} ${de(v, 4)}`;
+  $("sp-hint").innerHTML = `Pythagoras: (√${n})² + 1² = ${n} + 1 = ${n + 1}, also ist die Hypotenuse √${n + 1}. Fett markiert sind die glatten Wurzeln √4, √9, √16.`;
+}
+$("sp").addEventListener("input", drawSpiral);
+drawSpiral();
+
+/* ---------- Heron-Verfahren ---------- */
+let H = { A: 10, a: 10, b: 1, rows: [] };
+function heronReset() {
+  const A = +$("ha").value;
+  $("ha-v").textContent = A;
+  H = { A, a: A, b: 1, rows: [[A, 1]] };
+  drawHeron();
+}
+function heronStep() {
+  if (H.rows.length > 8) return;
+  H.a = (H.a + H.b) / 2;
+  H.b = H.A / H.a;
+  H.rows.push([H.a, H.b]);
+  drawHeron();
+}
+function drawHeron() {
+  const s = $("heron-svg");
+  s.innerHTML = "";
+  const S = Math.min(300 / H.a, 220 / H.b, 220 / Math.sqrt(H.A));
+  const x0 = 20, y0 = 240;
+  const r = Math.sqrt(H.A) * S;
+  el("rect", { x: x0, y: y0 - H.b * S, width: H.a * S, height: H.b * S, class: "sq" }, s);
+  el("rect", { x: x0, y: y0 - r, width: r, height: r, class: "target" }, s);
+  el("text", { x: x0 + 4, y: y0 - H.b * S - 6, class: "lm" }, s).textContent = `${de(H.a, 4)} × ${de(H.b, 4)}`;
+  const tg = el("text", { x: x0 + r + 6, y: y0 - r + 14, class: "lm" }, s);
+  tg.textContent = "Ziel: Quadrat";
+  tg.setAttribute("fill", "var(--ok)");
+  let rows = `<tr><td><b>Schritt</b></td><td><b>Seite a</b></td><td><b>Seite b = A : a</b></td></tr>`;
+  H.rows.forEach(([a, b], i) => {
+    rows += `<tr class="${i === H.rows.length - 1 ? "cur" : ""}"><td>${i}</td><td>${de(a, 6)}</td><td>${de(b, 6)}</td></tr>`;
+  });
+  rows += `<tr><td colspan="3" class="muted">Zum Vergleich: √${H.A} ≈ ${de(Math.sqrt(H.A), 6)}</td></tr>`;
+  $("h-table").innerHTML = rows;
+  $("h-step").disabled = H.rows.length > 8;
+}
+$("ha").addEventListener("input", heronReset);
+$("h-reset").addEventListener("click", heronReset);
+$("h-step").addEventListener("click", heronStep);
+heronReset();
+
+/* ---------- Graphen ---------- */
+const funcs = {
+  "2": { f: (x) => x * x, inv: "y = √x", name: "y = x²", xmin: 0, xmax: 1.85 },
+  "3": { f: (x) => x * x * x, inv: "y = ∛x", name: "y = x³", xmin: 0, xmax: 1.5 },
+  "0.5": { f: (x) => Math.sqrt(x), inv: "y = x²", name: "y = √x", xmin: 0, xmax: 3.4 },
+  "-1": { f: (x) => 1 / x, inv: "y = 1/x (sich selbst!)", name: "y = x⁻¹ = 1/x", xmin: 0.3, xmax: 3.4 },
+};
+let gn = "2";
+document.querySelectorAll("#g-chips button").forEach((b) => b.addEventListener("click", () => {
+  gn = b.dataset.n;
+  document.querySelectorAll("#g-chips button").forEach((x) => x.classList.toggle("on", x === b));
+  const F = funcs[gn], g = $("gx");
+  g.min = F.xmin; g.max = F.xmax;
+  g.value = Math.min(F.xmax, Math.max(F.xmin, 1.5));
+  drawGraph();
+}));
+function drawGraph() {
+  const F = funcs[gn], x = +$("gx").value, y = F.f(x), mirror = $("g-mirror").checked;
+  $("gx-v").textContent = de(x, 2);
+  const s = $("graph-svg");
+  s.innerHTML = "";
+  const U = 75, ox = 20 + 0.5 * U, oy = 320 - 0.5 * U;
+  const SX = (v) => ox + v * U, SY = (v) => oy - v * U;
+  const defs = el("defs", {}, s), cp = el("clipPath", { id: "gclip" }, defs);
+  el("rect", { x: 20, y: 20, width: 300, height: 300 }, cp);
+  for (let i = 0; i <= 3; i++) {
+    el("line", { x1: SX(i), y1: 20, x2: SX(i), y2: 320, class: "gridl" }, s);
+    el("line", { x1: 20, y1: SY(i), x2: 320, y2: SY(i), class: "gridl" }, s);
+    if (i > 0) {
+      el("text", { x: SX(i) - 3, y: oy + 15, class: "axis" }, s).textContent = i;
+      el("text", { x: ox - 12, y: SY(i) + 4, class: "axis" }, s).textContent = i;
+    }
+  }
+  el("line", { x1: 20, y1: oy, x2: 320, y2: oy, class: "ax" }, s);
+  el("line", { x1: ox, y1: 20, x2: ox, y2: 320, class: "ax" }, s);
+  const g = el("g", { "clip-path": "url(#gclip)" }, s);
+  const pts = [], ipts = [];
+  for (let t = 0; t <= 400; t++) {
+    const xv = F.xmin === 0 ? (t / 400) * 3.6 : 0.2 + (t / 400) * 3.4;
+    const yv = F.f(xv);
+    if (!isFinite(yv) || yv > 6) continue;
+    pts.push(`${SX(xv)},${SY(yv)}`);
+    ipts.push(`${SX(yv)},${SY(xv)}`);
+  }
+  if (mirror) {
+    el("line", { x1: SX(-0.5), y1: SY(-0.5), x2: SX(3.5), y2: SY(3.5), class: "diag" }, g);
+    el("polyline", { points: ipts.join(" "), class: "curve2" }, g);
+    el("line", { x1: SX(x), y1: SY(y), x2: SX(y), y2: SY(x), class: "diag" }, g);
+    el("circle", { cx: SX(y), cy: SY(x), r: 8, class: "marker" }, g);
+  }
+  el("polyline", { points: pts.join(" "), class: "curve" }, g);
+  el("circle", { cx: SX(x), cy: SY(y), r: 8, class: "pt", fill: "var(--accent)" }, g);
+  let out = `<span class="f1">${F.name}</span>: P(${de(x, 2)} | ${de(y, 2)})`;
+  if (mirror) out += `<br>Spiegelbild <span class="f2">${F.inv}</span>: P'(${de(y, 2)} | ${de(x, 2)})`;
+  $("g-out").innerHTML = out;
+}
+$("gx").addEventListener("input", drawGraph);
+$("g-mirror").addEventListener("change", drawGraph);
+drawGraph();
+
 </script>
 </body>
 </html>
