@@ -24,6 +24,7 @@ const Juice = (() => {
     spiegel:  ["🪞", "Spiegelmeister", "Alle vier Graphen gespiegelt"],
     zehner:   ["🔭", "Vom Atom zum Tera", "10⁻¹⁰ und 10¹² besucht"],
     rechter:  ["📐", "Rechter Winkel", "Im Dreieck genau 90° eingestellt"],
+    lektion_wurzel: ["🌻", "Beet geplant", "Lernpfad Quadratwurzel abgeschlossen"],
     level5:   ["🏆", "Level 5", "500 XP gesammelt"],
   };
   let prog = store.get("geo-progress", { xp: 0, ach: {}, best: 0 });
@@ -196,7 +197,7 @@ const Juice = (() => {
       const io = new IntersectionObserver((es) => es.forEach((en) => {
         if (en.isIntersecting) { en.target.classList.add("j-in"); io.unobserve(en.target); }
       }), { threshold: 0.08 });
-      document.querySelectorAll("section.card, a.chapter").forEach((s) => {
+      document.querySelectorAll("section.card:not(.step), a.chapter").forEach((s) => {
         if (s.getBoundingClientRect().top < innerHeight) return; // schon sichtbar: nicht verstecken
         s.classList.add("j-hide"); io.observe(s);
       });

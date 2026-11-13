@@ -1,0 +1,443 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lektion Quadratwurzel – Geo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap">
+  <link rel="stylesheet" href="style.css">
+  <script src="juice.js"></script>
+  <style>
+    body { padding-bottom: 90px; }
+    section.card.step { display: none; }
+    section.card.step.active { display: block; animation: j-in-up .35s; }
+    .kicker { font-size: .8rem; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: var(--accent2); }
+    .task { border-left: 5px solid var(--accent); background: var(--fill); border-radius: 10px; padding: 8px 12px; margin: 10px 0; }
+    .task.done { border-left-color: var(--ok); background: color-mix(in srgb, var(--ok) 14%, transparent); }
+    .task.done::before { content: "✓ "; color: var(--ok); font-weight: 900; }
+    .task.todo { opacity: .45; }
+    .merk { border: 2px solid var(--accent2); background: var(--fill2); border-radius: 14px; padding: 12px 14px; margin: 10px 0; }
+    .merk h3 { margin: 0 0 4px; font-size: 1rem; }
+    .reveal { cursor: pointer; border: 2px dashed var(--accent); border-radius: 12px; padding: 10px 12px; margin: 10px 0; color: var(--accent); font-weight: 700; text-align: center; }
+    .hidden { display: none; }
+    .hint { background: color-mix(in srgb, var(--bad) 12%, transparent); border-radius: 10px; padding: 8px 12px; margin: 6px 0; }
+    .good { background: color-mix(in srgb, var(--ok) 14%, transparent); border-radius: 10px; padding: 8px 12px; margin: 6px 0; }
+    .live { font-size: 1.15rem; font-weight: 800; text-align: center; padding: 8px; border-radius: 10px; margin: 6px 0; transition: background .2s; }
+    .live.lo { background: color-mix(in srgb, var(--accent) 18%, transparent); }
+    .live.hi { background: color-mix(in srgb, var(--accent2) 22%, transparent); }
+    .live.hit { background: color-mix(in srgb, var(--ok) 25%, transparent); }
+    .cell { fill: var(--fill); stroke: var(--accent); stroke-width: .6; }
+    .sqo { fill: none; stroke: var(--accent); stroke-width: 3; }
+    .gridl { stroke: var(--grid); stroke-width: 1; }
+    .axis { fill: var(--muted); font-size: 12px; }
+    .dim { fill: var(--fg); font-size: 15px; font-weight: 800; }
+    .yn { display: flex; gap: 8px; }
+    .yn button { flex: 1; }
+    .chain { display: flex; align-items: center; justify-content: center; gap: 6px; flex-wrap: wrap; font-weight: 800; font-size: 1.2rem; margin: 10px 0; }
+    .chain .box { background: var(--fill); border-radius: 10px; padding: 6px 12px; }
+    .chain .arr { font-size: .8rem; color: var(--muted); text-align: center; line-height: 1.1; }
+    .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin: 8px 0; }
+    .lessonnav {
+      position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; display: flex; align-items: center; gap: 10px;
+      padding: 10px 14px; background: color-mix(in srgb, var(--card) 92%, transparent); backdrop-filter: blur(8px);
+      border-top: 1px solid var(--grid);
+    }
+    .dots { flex: 1; display: flex; justify-content: center; gap: 6px; }
+    .dots i { width: 9px; height: 9px; border-radius: 50%; background: var(--grid); transition: all .2s; }
+    .dots i.on { background: var(--accent); width: 22px; border-radius: 6px; }
+    .dots i.seen { background: var(--accent); opacity: .5; }
+    #next[disabled] { opacity: .35; }
+    #next.pulse { animation: j-glow 1.2s infinite; }
+    .garden { font-size: 3rem; text-align: center; margin: 4px 0; }
+  </style>
+</head>
+<body>
+<main>
+  <a class="back" href="./">← Alle Kapitel</a>
+  <h1>Die Quadratwurzel</h1>
+  <p class="lead">Ein geführter Lernpfad in kleinen Schritten.</p>
+
+  <!-- 1 Einstieg -->
+  <section class="card step" data-title="Einstieg">
+    <div class="kicker">Schritt 1 · Das Problem</div>
+    <h2>Ein Beet für den Schulgarten</h2>
+    <div class="garden">🌱🌻🌱</div>
+    <p>Eure Klasse bekommt ein <b>quadratisches Beet</b>. Der Hausmeister sagt: „Ihr habt genau <b>20 m²</b> Fläche.“</p>
+    <p>Ihr wollt einen Zaun bauen und müsst wissen: <b>Wie lang ist eine Seite des Beets?</b></p>
+    <div class="task" id="t-guess">Schätze zuerst, ohne zu rechnen:</div>
+    <div class="row"><input class="answer" id="guess" inputmode="decimal" placeholder="z. B. 5"> <b>m</b> <button class="btn primary" id="guess-ok">Festhalten</button></div>
+    <p class="muted" id="guess-fb"></p>
+  </section>
+
+  <!-- 2 Vom Bekannten ausgehen -->
+  <section class="card step" data-title="Rückwärts denken">
+    <div class="kicker">Schritt 2 · Vom Bekannten ausgehen</div>
+    <h2>Erst andersherum</h2>
+    <p>Andersherum ist es leicht: Kennst du die Seite, rechnest du <b>Seite · Seite = Fläche</b>. Jedes Kästchen ist 1 m².</p>
+    <label class="slider">Seite = <b id="s2-v"></b> m<input type="range" id="s2" min="0" max="6" step="1" value="2"></label>
+    <svg class="board" id="sq2" viewBox="0 0 300 300" aria-label="Quadrat aus Kästchen"></svg>
+    <div class="live" id="s2-out"></div>
+    <div class="task" id="t2a">Auftrag 1: Stell ein Beet mit <b>16 m²</b> ein.</div>
+    <div class="task todo" id="t2b">Auftrag 2: Stell ein Beet mit <b>25 m²</b> ein.</div>
+    <div class="task todo" id="t2c">Auftrag 3: Versuche <b>20 m²</b> einzustellen. Klappt das?</div>
+    <p id="s2-fb"></p>
+  </section>
+
+  <!-- 3 Eingrenzen -->
+  <section class="card step" data-title="Eingrenzen">
+    <div class="kicker">Schritt 3 · Eingrenzen</div>
+    <h2>Zwischen 4 und 5 – aber wo?</h2>
+    <p>16 m² ist zu klein, 25 m² ist zu groß. Also liegt die Seite <b>zwischen 4 m und 5 m</b>. Jetzt kannst du in feineren Schritten suchen.</p>
+    <label class="slider">Seite = <b id="s3-v"></b> m<input type="range" id="s3" min="4" max="5" step="0.1" value="4"></label>
+    <svg class="board" id="sq3" viewBox="0 0 300 300" aria-label="Quadrat nahe 20 Quadratmeter"></svg>
+    <div class="live" id="s3-out"></div>
+    <div class="task" id="t3a">Auftrag: Komm so nah wie möglich an <b>20 m²</b> heran (eine Stelle nach dem Komma).</div>
+    <div class="task todo hidden" id="t3b">Noch genauer: Jetzt mit zwei Stellen nach dem Komma.</div>
+    <label class="slider hidden" id="s3f-wrap">Feinregler: Seite = <b id="s3f-v"></b> m<input type="range" id="s3f" min="4.4" max="4.5" step="0.01" value="4.4"></label>
+    <div id="s3-done" class="hidden">
+      <div class="good">Du hast die Seite gefunden: etwa <b>4,47 m</b>. Probe: 4,47 · 4,47 = 19,98 ≈ 20. <span id="guess-compare"></span></div>
+      <p>Ganz genau geht es übrigens nie: Die Zahl hat unendlich viele Nachkommastellen, 4,4721359… Deshalb gibt es dafür ein eigenes Zeichen.</p>
+    </div>
+  </section>
+
+  <!-- 4 Merksatz -->
+  <section class="card step" data-title="Merksatz">
+    <div class="kicker">Schritt 4 · Das hast du entdeckt</div>
+    <h2>Die Quadratwurzel</h2>
+    <p>Du hast eine Zahl gesucht, die <b>mit sich selbst multipliziert 20 ergibt</b>. Diese Zahl heißt <b>Quadratwurzel aus 20</b>, kurz <b>√20</b>.</p>
+    <div class="chain">
+      <span class="box">4,47</span><span class="arr">quadrieren<br>→ · sich selbst</span><span class="box">20</span><span class="arr">Wurzel ziehen<br>← √</span><span class="box">4,47</span>
+    </div>
+    <div class="reveal" data-target="r4a">Was macht das Wurzelziehen also mit dem Quadrieren? Erst überlegen, dann tippen.</div>
+    <div class="good hidden" id="r4a">Es macht das Quadrieren <b>rückgängig</b>, so wie Teilen das Malnehmen rückgängig macht.</div>
+    <div class="reveal" data-target="r4b">Auch (−4,47) · (−4,47) ergibt 20. Warum nimmt man trotzdem 4,47?</div>
+    <div class="good hidden" id="r4b">Eine Seitenlänge ist nie negativ. Man hat festgelegt: <b>√ ist immer die nicht negative Lösung.</b></div>
+    <div class="merk">
+      <h3>📌 Merksatz</h3>
+      <b>√a</b> ist die nicht negative Zahl, die mit sich selbst multipliziert <b>a</b> ergibt.<br>
+      Die Zahl unter der Wurzel heißt <b>Radikand</b>. Beispiele: √16 = 4, weil 4 · 4 = 16. √20 ≈ 4,47.<br>
+      <b>Probe:</b> Ergebnis mit sich selbst malnehmen, dann muss der Radikand herauskommen.
+    </div>
+  </section>
+
+  <!-- 5 Quadratzahlen -->
+  <section class="card step" data-title="Quadratzahlen">
+    <div class="kicker">Schritt 5 · Werkzeug schärfen</div>
+    <h2>Quadratzahlen sind dein Kompass</h2>
+    <p>Wer die Quadratzahlen kennt, kann jede Wurzel sofort eingrenzen. Löse 5 Aufgaben richtig.</p>
+    <div class="big" id="q5"></div>
+    <div class="row"><input class="answer" id="a5" inputmode="numeric" autocomplete="off" placeholder="Antwort"><button class="btn primary" id="c5">Prüfen</button></div>
+    <p id="f5"></p>
+    <p class="muted">Geschafft: <b id="n5">0</b> von 5</p>
+  </section>
+
+  <!-- 6 Typische Fehler -->
+  <section class="card step" data-title="Stolperfallen">
+    <div class="kicker">Schritt 6 · Stolperfallen</div>
+    <h2>Stimmt das?</h2>
+    <div class="big">√(9 + 16) = √9 + √16</div>
+    <div class="yn"><button class="btn" data-yn="yes">Ja, stimmt</button><button class="btn" data-yn="no">Nein</button></div>
+    <div id="f6a" class="hidden">
+      <p id="f6a-text"></p>
+      <p>Schau es dir an Quadraten an: Die Flächen 9 und 16 zusammen ergeben 25. Ein Quadrat mit 25 m² hat aber die Seite <b>5</b>, nicht 3 + 4 = 7.</p>
+      <svg class="board" id="sq6" viewBox="0 0 320 230" aria-label="Quadrate 9, 16 und 25"></svg>
+      <div class="merk"><b>Achtung:</b> √(a + b) ist nicht √a + √b. Bei Summen erst rechnen, dann die Wurzel ziehen.</div>
+      <div class="task" id="t6b">Und das hier? Was ist <b>√(−4)</b>?</div>
+      <div class="yn"><button class="btn" data-neg="2">2</button><button class="btn" data-neg="-2">−2</button><button class="btn" data-neg="none">gibt es nicht</button></div>
+      <p id="f6b"></p>
+    </div>
+  </section>
+
+  <!-- 7 Check -->
+  <section class="card step" data-title="Check">
+    <div class="kicker">Schritt 7 · Kannst du es?</div>
+    <h2>Abschluss-Check</h2>
+    <div id="check-box"></div>
+  </section>
+
+  <!-- 8 Ende -->
+  <section class="card step" data-title="Geschafft">
+    <div class="kicker">Geschafft</div>
+    <h2>Das Beet ist geplant 🌻</h2>
+    <p>Jede Seite ist <b>√20 ≈ 4,47 m</b> lang. Für den Zaun braucht ihr also 4 · 4,47 ≈ <b>17,9 m</b>.</p>
+    <div class="merk">
+      <h3>Das nimmst du mit</h3>
+      • √a ist die nicht negative Zahl, die mit sich selbst a ergibt.<br>
+      • Wurzelziehen macht Quadrieren rückgängig.<br>
+      • Eingrenzen mit Quadratzahlen: 16 &lt; 20 &lt; 25, also 4 &lt; √20 &lt; 5.<br>
+      • Probe machen: Ergebnis · Ergebnis = Radikand?<br>
+      • √(a + b) ≠ √a + √b, und √ einer negativen Zahl gibt es nicht.
+    </div>
+    <p>Weiter üben und ausprobieren: <a href="potenzen.html#wurzel">Werkzeugkasten Potenzen und Wurzeln</a> (Wurzelspirale, Heron-Verfahren, Blitzrunde).</p>
+  </section>
+</main>
+
+<nav class="lessonnav">
+  <button class="btn" id="prev">←</button>
+  <div class="dots" id="dots"></div>
+  <button class="btn primary" id="next">Weiter →</button>
+</nav>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const NS = "http://www.w3.org/2000/svg";
+const de = (v, d = 2) => Number(v).toLocaleString("de-DE", { maximumFractionDigits: d });
+const parseDe = (s) => { s = String(s).trim().replace(/\s/g, "").replace(",", "."); return s === "" ? NaN : +s; };
+function el(tag, attrs, parent) {
+  const e = document.createElementNS(NS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(e);
+  return e;
+}
+
+/* ---------- Lektions-Gerüst ---------- */
+const steps = [...document.querySelectorAll(".step")];
+const ready = steps.map(() => false);
+let cur = 0;
+steps.forEach(() => $("dots").appendChild(document.createElement("i")));
+function show(i) {
+  cur = i;
+  steps.forEach((s, k) => s.classList.toggle("active", k === i));
+  [...$("dots").children].forEach((d, k) => { d.className = k === i ? "on" : k < i ? "seen" : ""; });
+  $("prev").disabled = i === 0;
+  $("next").disabled = !ready[i];
+  $("next").classList.toggle("pulse", ready[i] && i < steps.length - 1);
+  $("next").textContent = i === steps.length - 1 ? "Fertig ✓" : "Weiter →";
+  scrollTo({ top: 0, behavior: "smooth" });
+  if (inits[i]) { inits[i](); inits[i] = null; }
+}
+function unlock(i, msg) {
+  if (ready[i]) return;
+  ready[i] = true;
+  if (i === cur) { $("next").disabled = false; $("next").classList.add("pulse"); }
+  Juice.sfx.good();
+}
+$("next").onclick = () => {
+  if (cur < steps.length - 1) { Juice.sfx.pop(cur / steps.length); show(cur + 1); }
+  else location.href = "./";
+};
+$("prev").onclick = () => cur > 0 && show(cur - 1);
+document.querySelectorAll(".reveal").forEach((r) => r.onclick = () => {
+  r.classList.add("hidden"); $(r.dataset.target).classList.remove("hidden"); Juice.sfx.pop(0.7);
+  if (document.querySelectorAll("#" + steps[3].id + " .reveal:not(.hidden)").length === 0) unlock(3);
+});
+steps[3].id = "st4";
+
+/* ---------- Quadrat mit Kästchen ---------- */
+function drawSquare(svg, side, maxSide = 6) {
+  svg.innerHTML = "";
+  const U = 270 / maxSide, ox = 15, oy = 285;
+  for (let i = 0; i <= maxSide; i++) {
+    el("line", { x1: ox + i * U, y1: oy, x2: ox + i * U, y2: oy - maxSide * U, class: "gridl" }, svg);
+    el("line", { x1: ox, y1: oy - i * U, x2: ox + maxSide * U, y2: oy - i * U, class: "gridl" }, svg);
+  }
+  const full = Math.floor(side);
+  for (let r = 0; r < Math.ceil(side); r++) for (let c = 0; c < Math.ceil(side); c++) {
+    const w = Math.min(1, side - c), h = Math.min(1, side - r);
+    el("rect", { x: ox + c * U, y: oy - (r + h) * U, width: w * U, height: h * U, class: "cell" }, svg);
+  }
+  el("rect", { x: ox, y: oy - side * U, width: side * U, height: side * U, class: "sqo" }, svg);
+  if (side > 0) el("text", { x: ox + side * U / 2, y: oy - side * U - 6, class: "dim", "text-anchor": "middle" }, svg).textContent = de(side) + " m";
+}
+
+/* ---------- Schritt 1 ---------- */
+let guess = null;
+$("guess-ok").onclick = () => {
+  const g = parseDe($("guess").value);
+  if (!(g > 0)) { Juice.shake($("guess")); $("guess-fb").textContent = "Gib eine Zahl ein. Raten ist erlaubt!"; return; }
+  guess = g;
+  $("t-guess").classList.add("done");
+  $("guess-fb").innerHTML = `Deine Schätzung: <b>${de(g)} m</b>. Wir prüfen sie am Ende. Weiter geht's!`;
+  unlock(0);
+};
+
+/* ---------- Schritt 2 ---------- */
+const tasks2 = [["t2a", 16], ["t2b", 25], ["t2c", 20]];
+let t2 = 0;
+function step2() {
+  const s = +$("s2").value, A = s * s;
+  $("s2-v").textContent = s;
+  drawSquare($("sq2"), s);
+  $("s2-out").textContent = `${s} m · ${s} m = ${A} m²`;
+  $("s2-out").className = "live";
+  if (t2 < 2 && A === tasks2[t2][1]) {
+    $(tasks2[t2][0]).classList.add("done");
+    t2++;
+    $(tasks2[t2][0]).classList.remove("todo");
+    $("s2-out").classList.add("hit");
+    Juice.sfx.good(); Juice.floatText($("s2-out"), "✓");
+  }
+  if (t2 === 2) {
+    if (A === 16 || A === 25) {
+      $("s2-fb").innerHTML = `<div class="hint">Mit ganzen Metern springt die Fläche von <b>16 m²</b> direkt auf <b>25 m²</b>. 20 m² liegt dazwischen. Die Seite muss also eine Kommazahl zwischen 4 und 5 sein.</div>`;
+      $("t2c").classList.add("done");
+      unlock(1);
+    }
+  }
+}
+$("s2").addEventListener("input", step2);
+step2();
+
+/* ---------- Schritt 3 ---------- */
+let phase3 = 0;
+function live3(s) {
+  const A = s * s, o = $("s3-out"), diff = A - 20;
+  drawSquare($("sq3"), s);
+  o.innerHTML = `${de(s)} · ${de(s)} = ${de(A, 4)} m² ` + (Math.abs(diff) < (phase3 ? 0.05 : 0.3) ? "🎯" : diff < 0 ? "→ zu klein" : "→ zu groß");
+  o.className = "live " + (Math.abs(diff) < (phase3 ? 0.05 : 0.3) ? "hit" : diff < 0 ? "lo" : "hi");
+  return Math.abs(diff);
+}
+function step3() {
+  const s = +$("s3").value;
+  $("s3-v").textContent = de(s);
+  const d = live3(s);
+  if (phase3 === 0 && d < 0.3) {
+    phase3 = 1;
+    $("t3a").classList.add("done");
+    $("t3a").innerHTML += ` 4,4 · 4,4 = 19,36 ist zu klein, 4,5 · 4,5 = 20,25 ist zu groß. Die Seite liegt also zwischen 4,4 und 4,5.`;
+    $("t3b").classList.remove("hidden", "todo");
+    $("s3f-wrap").classList.remove("hidden");
+    Juice.sfx.good();
+  }
+}
+function step3f() {
+  const s = +$("s3f").value;
+  $("s3f-v").textContent = de(s);
+  const d = live3(s);
+  if (phase3 === 1 && d < 0.05) {
+    phase3 = 2;
+    $("t3b").classList.add("done");
+    $("s3-done").classList.remove("hidden");
+    if (guess) {
+      const err = Math.abs(guess - Math.sqrt(20));
+      $("guess-compare").textContent = `Deine Schätzung war ${de(guess)} m, ` + (err < 0.3 ? "richtig gut!" : err < 1 ? "nicht schlecht." : "da lagst du ein Stück daneben. Jetzt weißt du, wie man es genau findet.");
+    }
+    Juice.confettiAt($("s3-out"), 50, 0.7);
+    unlock(2);
+  }
+}
+$("s3").addEventListener("input", step3);
+$("s3f").addEventListener("input", step3f);
+step3();
+
+/* ---------- Schritt 5: Quadratzahlen ---------- */
+let n5 = 0, q5 = 0;
+const pool5 = [4, 5, 6, 7, 8, 9, 11, 12, 13, 15, 20];
+function new5() {
+  let k; do { k = pool5[Math.floor(Math.random() * pool5.length)]; } while (k === q5);
+  q5 = k;
+  $("q5").textContent = `√${k * k} = ?`;
+  $("a5").value = ""; Juice.bump($("q5"));
+}
+function check5() {
+  const v = parseDe($("a5").value);
+  if (isNaN(v)) { Juice.shake($("a5")); return; }
+  if (v === q5) {
+    n5++; $("n5").textContent = n5;
+    $("f5").innerHTML = `<span class="ok">Richtig!</span> ${q5} · ${q5} = ${q5 * q5}`;
+    Juice.sfx.good();
+    if (n5 >= 5) { $("f5").innerHTML += " Stark, du kennst die Quadratzahlen!"; unlock(4); Juice.confettiAt($("q5"), 40, .6); return; }
+    setTimeout(new5, 700);
+  } else {
+    Juice.sfx.bad(); Juice.shake($("q5"));
+    const hint = v === (q5 * q5) / 2
+      ? "Die Wurzel ist nicht die Hälfte! Gesucht ist eine Zahl, die <b>mit sich selbst</b> malgenommen die Zahl ergibt."
+      : `Mach die Probe: ${de(v)} · ${de(v)} = ${de(v * v)}. Das ist ${v * v < q5 * q5 ? "zu klein" : "zu groß"}.`;
+    $("f5").innerHTML = `<div class="hint">${hint}</div>`;
+  }
+}
+$("c5").onclick = check5;
+$("a5").addEventListener("keydown", (e) => e.key === "Enter" && check5());
+const inits = [];
+inits[4] = new5;
+
+/* ---------- Schritt 6: Stolperfallen ---------- */
+document.querySelectorAll("[data-yn]").forEach((b) => b.onclick = () => {
+  const yes = b.dataset.yn === "yes";
+  $("f6a").classList.remove("hidden");
+  $("f6a-text").innerHTML = yes
+    ? `<div class="hint">Das denken viele! Rechne nach: √(9 + 16) = √25 = <b>5</b>. Aber √9 + √16 = 3 + 4 = <b>7</b>.</div>`
+    : `<div class="good">Richtig erkannt! √(9 + 16) = √25 = <b>5</b>, aber √9 + √16 = 3 + 4 = <b>7</b>.</div>`;
+  yes ? Juice.sfx.bad() : Juice.sfx.good();
+  drawSix();
+});
+function drawSix() {
+  const s = $("sq6"); s.innerHTML = "";
+  const U = 28, base = 210;
+  const sq = (x, n, cls, label) => {
+    el("rect", { x, y: base - n * U, width: n * U, height: n * U, class: cls }, s);
+    for (let i = 1; i < n; i++) {
+      el("line", { x1: x + i * U, y1: base, x2: x + i * U, y2: base - n * U, class: "gridl" }, s);
+      el("line", { x1: x, y1: base - i * U, x2: x + n * U, y2: base - i * U, class: "gridl" }, s);
+    }
+    el("text", { x: x + n * U / 2, y: base + 16, class: "axis", "text-anchor": "middle" }, s).textContent = label;
+  };
+  sq(5, 3, "cell", "9 m² → Seite 3");
+  sq(100, 4, "cell", "16 m² → Seite 4");
+  el("text", { x: 228, y: 120, class: "dim", "text-anchor": "middle" }, s).textContent = "≠";
+  // 25 als Summe angedeutet
+  const s5 = el("g", {}, s);
+  el("rect", { x: 245, y: base - 5 * 14, width: 5 * 14, height: 5 * 14, class: "cell" }, s5);
+  el("text", { x: 280, y: base + 16, class: "axis", "text-anchor": "middle" }, s).textContent = "25 m² → Seite 5";
+}
+document.querySelectorAll("[data-neg]").forEach((b) => b.onclick = () => {
+  const v = b.dataset.neg;
+  if (v === "none") {
+    $("f6b").innerHTML = `<div class="good">Genau! 2 · 2 = 4 und (−2) · (−2) = 4. Keine Zahl ergibt mit sich selbst malgenommen −4. <b>√ einer negativen Zahl ist nicht definiert.</b></div>`;
+    $("t6b").classList.add("done");
+    unlock(5);
+  } else {
+    $("f6b").innerHTML = `<div class="hint">Mach die Probe: ${v === "2" ? "2 · 2" : "(−2) · (−2)"} = 4, nicht −4. Versuch es noch einmal.</div>`;
+    Juice.sfx.bad();
+  }
+});
+
+/* ---------- Schritt 7: Check ---------- */
+const checks = [
+  { q: "Zwischen welchen zwei ganzen Zahlen liegt √50?", two: true, ok: (a, b) => a === 7 && b === 8,
+    hint: (a, b) => `Welche Quadratzahlen liegen um 50? ${a ? a + "² = " + a * a : ""}${b ? ", " + b + "² = " + b * b : ""}. Gesucht: die Quadratzahl direkt darunter und direkt darüber.` },
+  { q: "√0,25 = ?", ok: (v) => Math.abs(v - 0.5) < 1e-9,
+    hint: (v) => `Probe: ${de(v, 4)} · ${de(v, 4)} = ${de(v * v, 6)}. ${v === 0.05 ? "Vorsicht beim Komma! Gesucht ist eine Zahl, die mal sich selbst 0,25 ergibt." : "Tipp: 0,25 = 25/100, also √25 / √100."}` },
+  { q: "Ein quadratisches Zimmer hat 30 m². Wie lang ist eine Seite? (auf eine Stelle nach dem Komma)", ok: (v) => Math.abs(v - 5.5) < 0.051,
+    hint: (v) => v === 7.5 ? "30 : 4 ist der Umfang-Gedanke. Gesucht ist eine Zahl, die mit sich selbst 30 ergibt." : `Probe: ${de(v)} · ${de(v)} = ${de(v * v)}. 5² = 25 und 6² = 36, die Seite liegt also zwischen 5 und 6.` },
+  { q: "√(36 + 64) = ?", ok: (v) => v === 10,
+    hint: (v) => v === 14 ? "Stolperfalle! Erst 36 + 64 rechnen, dann die Wurzel ziehen." : "Erst die Summe unter der Wurzel ausrechnen." },
+];
+let ci = 0, tries = 0;
+function renderCheck() {
+  const c = checks[ci], box = $("check-box");
+  box.innerHTML = `<p class="muted">Aufgabe ${ci + 1} von ${checks.length}</p><div class="big" style="font-size:1.1rem">${c.q}</div>
+    <div class="row">${c.two ? `<input class="answer" id="ca" inputmode="numeric" style="width:4em"> &lt; √50 &lt; <input class="answer" id="cb" inputmode="numeric" style="width:4em">`
+      : `<input class="answer" id="ca" inputmode="decimal" autocomplete="off">`}<button class="btn primary" id="cc">Prüfen</button></div><div id="cf"></div>`;
+  $("cc").onclick = doCheck;
+  box.querySelectorAll("input").forEach((i) => i.addEventListener("keydown", (e) => e.key === "Enter" && doCheck()));
+}
+function doCheck() {
+  const c = checks[ci], a = parseDe($("ca").value), b = c.two ? parseDe($("cb").value) : undefined;
+  if (isNaN(a) || (c.two && isNaN(b))) { Juice.shake($("check-box")); return; }
+  if (c.ok(a, b)) {
+    Juice.sfx.good(); Juice.addXP(10, $("cc"));
+    $("cf").innerHTML = `<div class="good">Richtig!</div>`;
+    ci++; tries = 0;
+    if (ci < checks.length) setTimeout(renderCheck, 900);
+    else { $("cf").innerHTML = `<div class="good"><b>Alle Aufgaben gelöst!</b> Du kannst Quadratwurzeln.</div>`; Juice.confetti(); unlock(6); }
+  } else {
+    tries++;
+    Juice.sfx.bad(); Juice.shake($("check-box"));
+    $("cf").innerHTML = `<div class="hint">${c.hint(a, b)}</div>` + (tries >= 3 ? `<button class="btn" id="skip">Lösung zeigen</button>` : "");
+    if (tries >= 3) $("skip").onclick = () => {
+      const sol = ["7 und 8", "0,5", "5,5", "10"][ci];
+      $("cf").innerHTML = `<div class="hint">Lösung: <b>${sol}</b>. Schau dir die Aufgabe noch einmal in Ruhe an.</div>`;
+      ci++; tries = 0;
+      if (ci < checks.length) setTimeout(renderCheck, 2200); else { unlock(6); }
+    };
+  }
+}
+inits[6] = renderCheck;
+inits[7] = () => { ready[7] = true; $("next").disabled = false; Juice.achieve("lektion_wurzel"); };
+
+show(0);
+</script>
+</body>
+</html>
