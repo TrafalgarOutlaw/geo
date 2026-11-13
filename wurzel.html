@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap">
   <link rel="stylesheet" href="style.css">
   <script src="juice.js"></script>
+  <script src="app.js"></script>
   <style>
     /* Ein Schritt = ein Bildschirm: Seite füllt genau die Höhe, nur der Schritt passt sich an */
     html, body { height: 100%; }
@@ -33,6 +34,7 @@
     .step label.slider { margin: 2px 0; display: flex; align-items: center; gap: 4px; white-space: nowrap; }
     .step label.slider b { min-width: 2.6em; display: inline-block; }
     .step label.slider input { height: 30px; flex: 1; min-width: 0; margin-left: 6px; }
+    @media (max-height: 680px) { .lhead { display: none; } section.card.step.active { margin-top: 2px; } }
     @media (max-height: 760px) { .step { font-size: .94rem; } .step h2 { font-size: 1.02rem; } .garden { font-size: 2rem; } }
     .step .big { margin: 6px 0; padding: 8px; }
     .j-toasts { bottom: 74px; }
@@ -64,13 +66,19 @@
     .chain .arr { font-size: .68rem; color: var(--muted); text-align: center; line-height: 1.1; }
     .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin: 6px 0; }
     .lessonnav {
-      flex-shrink: 0; margin: 0 -10px; z-index: 40; display: flex; align-items: center; gap: 10px;
+      flex-shrink: 0; margin: 0 -10px; z-index: 40; display: flex; align-items: center; gap: 8px;
       padding: 8px 14px calc(8px + env(safe-area-inset-bottom)); background: color-mix(in srgb, var(--card) 92%, transparent); backdrop-filter: blur(8px);
       border-top: 1px solid var(--grid);
     }
-    .dots { flex: 1; display: flex; justify-content: center; gap: 6px; }
-    .dots i { width: 9px; height: 9px; border-radius: 50%; background: var(--grid); transition: all .2s; }
-    .dots i.on { background: var(--accent); width: 22px; border-radius: 6px; }
+    .dots { flex: 1; display: flex; justify-content: center; gap: 4px; min-width: 0; overflow: hidden; }
+    .dots i { flex-shrink: 0; width: 8px; height: 8px; border-radius: 50%; background: var(--grid); transition: all .2s; }
+    .dots i.on { background: var(--accent); width: 18px; border-radius: 6px; }
+    .lessonnav .btn { min-width: 44px; padding: 8px 12px; flex-shrink: 0; }
+    #speak.on { background: var(--accent); color: var(--bg); }
+    #next { white-space: nowrap; }
+    @media (max-width: 380px) { .lessonnav { gap: 6px; padding-left: 10px; padding-right: 10px; } .lessonnav .btn { padding: 8px 10px; } .dots { gap: 3px; } .dots i { width: 6px; height: 6px; } .dots i.on { width: 14px; } }
+    html.beamer body { padding-left: 24px; padding-right: 24px; }
+    html.beamer .lessonnav { margin: 0 -24px; }
     .dots i.seen { background: var(--accent); opacity: .5; }
     #next[disabled] { opacity: .35; }
     #next.pulse { animation: j-glow 1.2s infinite; }
@@ -207,8 +215,9 @@
 </main>
 
 <nav class="lessonnav">
-  <button class="btn" id="prev">←</button>
-  <div class="dots" id="dots"></div>
+  <button class="btn" id="prev" aria-label="Zurück">←</button>
+  <button class="btn" id="speak" aria-label="Schritt vorlesen">🔈</button>
+  <div class="dots" id="dots" aria-hidden="true"></div>
   <button class="btn primary" id="next">Weiter →</button>
 </nav>
 
@@ -227,18 +236,24 @@ function el(tag, attrs, parent) {
 /* ---------- Lektions-Gerüst ---------- */
 const steps = [...document.querySelectorAll(".step")];
 const ready = steps.map(() => false);
-let cur = 0;
+let cur = 0, maxStep = 0;
+const saved = App.lessonState("wurzel");
+let lessonDone = !!saved.done;
 steps.forEach(() => $("dots").appendChild(document.createElement("i")));
 function show(i) {
   cur = i;
   steps.forEach((s, k) => s.classList.toggle("active", k === i));
   [...$("dots").children].forEach((d, k) => { d.className = k === i ? "on" : k < i ? "seen" : ""; });
   $("prev").disabled = i === 0;
-  $("next").disabled = !ready[i];
+  $("next").disabled = !ready[i] && !App.prefs.beamer;
   $("next").classList.toggle("pulse", ready[i] && i < steps.length - 1);
   $("next").textContent = i === steps.length - 1 ? "Fertig ✓" : "Weiter →";
   steps[i].scrollTop = 0;
   if (inits[i]) { inits[i](); inits[i] = null; }
+  if (window.speechSynthesis) speechSynthesis.cancel();
+  $("speak").classList.remove("on");
+  maxStep = Math.max(maxStep, i);
+  App.saveLesson("wurzel", { step: i, max: maxStep, total: steps.length, done: lessonDone || i === steps.length - 1 });
 }
 function unlock(i, msg) {
   if (ready[i]) return;
@@ -475,7 +490,22 @@ function doCheck() {
 inits[7] = renderCheck;
 inits[8] = () => { ready[8] = true; $("next").disabled = false; Juice.achieve("lektion_wurzel"); };
 
-show(0);
+/* ---------- Tastatur (auch Präsentations-Klicker), Vorlesen, Beamer ---------- */
+document.addEventListener("keydown", (e) => {
+  if (e.target.closest("input, textarea") || document.querySelector(".j-overlay")) return;
+  if (["ArrowRight", "PageDown"].includes(e.key) && !$("next").disabled && cur < steps.length - 1) { e.preventDefault(); $("next").click(); }
+  if (["ArrowLeft", "PageUp"].includes(e.key) && cur > 0) { e.preventDefault(); $("prev").click(); }
+});
+if (App.canSpeak) $("speak").onclick = () => App.speak(App.readVisible(steps[cur]), $("speak"));
+else $("speak").hidden = true;
+document.addEventListener("geo-prefs", () => { $("next").disabled = !ready[cur] && !App.prefs.beamer; });
+
+/* Weitermachen, wo man aufgehört hat */
+if (!saved.done && saved.step > 0 && saved.step < steps.length) {
+  maxStep = saved.max || saved.step;
+  for (let k = 0; k < maxStep; k++) ready[k] = true;
+  show(saved.step);
+} else show(0);
 </script>
 </body>
 </html>

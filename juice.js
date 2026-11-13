@@ -37,9 +37,12 @@ const Juice = (() => {
     if (ctx.state === "suspended") ctx.resume();
     return ctx;
   }
+  // Gesamtlautstärke: "leise" ist Standard (ca. 40 % der ursprünglichen Lautstärke)
+  const VOL = { leiser: 0.18, leise: 0.4, normal: 1 };
   function tone(f, dur = 0.12, type = "sine", vol = 0.12, when = 0, f2) {
     if (!soundOn) return;
     const c = ac(); if (!c) return;
+    vol *= VOL[store.get("geo-prefs", {}).vol || "leise"] || VOL.leise;
     const t = c.currentTime + when, o = c.createOscillator(), g = c.createGain();
     o.type = type; o.frequency.setValueAtTime(f, t);
     if (f2) o.frequency.exponentialRampToValueAtTime(f2, t + dur);
