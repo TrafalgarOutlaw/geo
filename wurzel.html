@@ -9,21 +9,45 @@
   <link rel="stylesheet" href="style.css">
   <script src="juice.js"></script>
   <style>
-    body { padding-bottom: 90px; }
+    /* Ein Schritt = ein Bildschirm: Seite füllt genau die Höhe, nur der Schritt passt sich an */
+    html, body { height: 100%; }
+    body {
+      height: 100vh; height: 100dvh; overflow: hidden;
+      display: flex; flex-direction: column;
+      padding: 50px 10px 0; line-height: 1.35;
+    }
+    main { flex: 1; min-height: 0; width: 100%; display: flex; flex-direction: column; }
+    .lhead { display: flex; align-items: baseline; gap: 10px; margin: 4px 2px 0; }
+    .lhead .back { margin: 0; font-size: .9rem; white-space: nowrap; }
+    .lhead h1 { font-size: 1.15rem; margin: 0; flex: 1; text-align: right; }
     section.card.step { display: none; }
-    section.card.step.active { display: block; animation: j-in-up .35s; }
+    section.card.step.active {
+      display: flex; flex-direction: column; flex: 1; min-height: 0;
+      margin: 6px 0; padding: 10px 14px; overflow-y: auto; animation: j-in-up .35s;
+    }
+    .step > * { flex-shrink: 0; }
+    .step p { margin: 0 0 .45rem; }
+    .step h2 { font-size: 1.1rem; margin-bottom: .3rem; }
+    /* Grafiken nehmen den restlichen Platz und schrumpfen bei kleinen Handys */
+    .step svg.board { flex: 1 1 0; min-height: 90px; max-height: 300px; width: 100%; height: auto; margin: 4px 0; }
+    .step label.slider { margin: 2px 0; display: flex; align-items: center; gap: 4px; white-space: nowrap; }
+    .step label.slider b { min-width: 2.6em; display: inline-block; }
+    .step label.slider input { height: 30px; flex: 1; min-width: 0; margin-left: 6px; }
+    @media (max-height: 760px) { .step { font-size: .94rem; } .step h2 { font-size: 1.02rem; } .garden { font-size: 2rem; } }
+    .step .big { margin: 6px 0; padding: 8px; }
+    .j-toasts { bottom: 74px; }
     .kicker { font-size: .8rem; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: var(--accent2); }
-    .task { border-left: 5px solid var(--accent); background: var(--fill); border-radius: 10px; padding: 8px 12px; margin: 10px 0; }
+    .task { border-left: 5px solid var(--accent); background: var(--fill); border-radius: 10px; padding: 6px 10px; margin: 5px 0; }
     .task.done { border-left-color: var(--ok); background: color-mix(in srgb, var(--ok) 14%, transparent); }
     .task.done::before { content: "✓ "; color: var(--ok); font-weight: 900; }
     .task.todo { opacity: .45; }
-    .merk { border: 2px solid var(--accent2); background: var(--fill2); border-radius: 14px; padding: 12px 14px; margin: 10px 0; }
+    .merk { border: 2px solid var(--accent2); background: var(--fill2); border-radius: 14px; padding: 8px 12px; margin: 6px 0; }
     .merk h3 { margin: 0 0 4px; font-size: 1rem; }
-    .reveal { cursor: pointer; border: 2px dashed var(--accent); border-radius: 12px; padding: 10px 12px; margin: 10px 0; color: var(--accent); font-weight: 700; text-align: center; }
+    .reveal { cursor: pointer; border: 2px dashed var(--accent); border-radius: 12px; padding: 7px 10px; margin: 6px 0; color: var(--accent); font-weight: 700; text-align: center; }
     .hidden { display: none; }
     .hint { background: color-mix(in srgb, var(--bad) 12%, transparent); border-radius: 10px; padding: 8px 12px; margin: 6px 0; }
     .good { background: color-mix(in srgb, var(--ok) 14%, transparent); border-radius: 10px; padding: 8px 12px; margin: 6px 0; }
-    .live { font-size: 1.15rem; font-weight: 800; text-align: center; padding: 8px; border-radius: 10px; margin: 6px 0; transition: background .2s; }
+    .live { font-size: 1.1rem; font-weight: 800; text-align: center; padding: 5px; border-radius: 10px; margin: 4px 0; transition: background .2s; }
     .live.lo { background: color-mix(in srgb, var(--accent) 18%, transparent); }
     .live.hi { background: color-mix(in srgb, var(--accent2) 22%, transparent); }
     .live.hit { background: color-mix(in srgb, var(--ok) 25%, transparent); }
@@ -34,13 +58,14 @@
     .dim { fill: var(--fg); font-size: 15px; font-weight: 800; }
     .yn { display: flex; gap: 8px; }
     .yn button { flex: 1; }
-    .chain { display: flex; align-items: center; justify-content: center; gap: 6px; flex-wrap: wrap; font-weight: 800; font-size: 1.2rem; margin: 10px 0; }
+    .chain { display: flex; align-items: center; justify-content: center; gap: 6px; flex-wrap: wrap; font-weight: 800; font-size: 1.1rem; margin: 6px 0; }
     .chain .box { background: var(--fill); border-radius: 10px; padding: 6px 12px; }
-    .chain .arr { font-size: .8rem; color: var(--muted); text-align: center; line-height: 1.1; }
-    .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin: 8px 0; }
+    .chain { flex-wrap: nowrap; font-size: 1rem; gap: 4px; }
+    .chain .arr { font-size: .68rem; color: var(--muted); text-align: center; line-height: 1.1; }
+    .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin: 6px 0; }
     .lessonnav {
-      position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; display: flex; align-items: center; gap: 10px;
-      padding: 10px 14px; background: color-mix(in srgb, var(--card) 92%, transparent); backdrop-filter: blur(8px);
+      flex-shrink: 0; margin: 0 -10px; z-index: 40; display: flex; align-items: center; gap: 10px;
+      padding: 8px 14px calc(8px + env(safe-area-inset-bottom)); background: color-mix(in srgb, var(--card) 92%, transparent); backdrop-filter: blur(8px);
       border-top: 1px solid var(--grid);
     }
     .dots { flex: 1; display: flex; justify-content: center; gap: 6px; }
@@ -49,14 +74,15 @@
     .dots i.seen { background: var(--accent); opacity: .5; }
     #next[disabled] { opacity: .35; }
     #next.pulse { animation: j-glow 1.2s infinite; }
-    .garden { font-size: 3rem; text-align: center; margin: 4px 0; }
+    .garden { font-size: 2.6rem; text-align: center; margin: 0; line-height: 1.2; }
+    .task.done.fold { display: none; }
+    .grow:not(.hidden) { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+    .grow > * { flex-shrink: 0; }
   </style>
 </head>
 <body>
 <main>
-  <a class="back" href="./">← Alle Kapitel</a>
-  <h1>Die Quadratwurzel</h1>
-  <p class="lead">Ein geführter Lernpfad in kleinen Schritten.</p>
+  <div class="lhead"><a class="back" href="./">← Alle Kapitel</a><h1>Die Quadratwurzel</h1></div>
 
   <!-- 1 Einstieg -->
   <section class="card step" data-title="Einstieg">
@@ -74,7 +100,7 @@
   <section class="card step" data-title="Rückwärts denken">
     <div class="kicker">Schritt 2 · Vom Bekannten ausgehen</div>
     <h2>Erst andersherum</h2>
-    <p>Andersherum ist es leicht: Kennst du die Seite, rechnest du <b>Seite · Seite = Fläche</b>. Jedes Kästchen ist 1 m².</p>
+    <p>Andersherum ist es leicht: <b>Seite · Seite = Fläche</b>. Jedes Kästchen ist 1 m².</p>
     <label class="slider">Seite = <b id="s2-v"></b> m<input type="range" id="s2" min="0" max="6" step="1" value="2"></label>
     <svg class="board" id="sq2" viewBox="0 0 300 300" aria-label="Quadrat aus Kästchen"></svg>
     <div class="live" id="s2-out"></div>
@@ -88,7 +114,7 @@
   <section class="card step" data-title="Eingrenzen">
     <div class="kicker">Schritt 3 · Eingrenzen</div>
     <h2>Zwischen 4 und 5 – aber wo?</h2>
-    <p>16 m² ist zu klein, 25 m² ist zu groß. Also liegt die Seite <b>zwischen 4 m und 5 m</b>. Jetzt kannst du in feineren Schritten suchen.</p>
+    <p id="s3-intro">16 m² ist zu klein, 25 m² ist zu groß. Also liegt die Seite <b>zwischen 4 m und 5 m</b>. Jetzt kannst du in feineren Schritten suchen.</p>
     <label class="slider">Seite = <b id="s3-v"></b> m<input type="range" id="s3" min="4" max="5" step="0.1" value="4"></label>
     <svg class="board" id="sq3" viewBox="0 0 300 300" aria-label="Quadrat nahe 20 Quadratmeter"></svg>
     <div class="live" id="s3-out"></div>
@@ -105,19 +131,19 @@
   <section class="card step" data-title="Merksatz">
     <div class="kicker">Schritt 4 · Das hast du entdeckt</div>
     <h2>Die Quadratwurzel</h2>
-    <p>Du hast eine Zahl gesucht, die <b>mit sich selbst multipliziert 20 ergibt</b>. Diese Zahl heißt <b>Quadratwurzel aus 20</b>, kurz <b>√20</b>.</p>
+    <p>Gesucht war die Zahl, die <b>mit sich selbst malgenommen 20 ergibt</b>. Sie heißt <b>Quadratwurzel aus 20</b>, kurz <b>√20</b>.</p>
     <div class="chain">
       <span class="box">4,47</span><span class="arr">quadrieren<br>→ · sich selbst</span><span class="box">20</span><span class="arr">Wurzel ziehen<br>← √</span><span class="box">4,47</span>
     </div>
     <div class="reveal" data-target="r4a">Was macht das Wurzelziehen also mit dem Quadrieren? Erst überlegen, dann tippen.</div>
-    <div class="good hidden" id="r4a">Es macht das Quadrieren <b>rückgängig</b>, so wie Teilen das Malnehmen rückgängig macht.</div>
+    <div class="good hidden" id="r4a">Es macht das Quadrieren <b>rückgängig</b>, so wie Teilen das Malnehmen.</div>
     <div class="reveal" data-target="r4b">Auch (−4,47) · (−4,47) ergibt 20. Warum nimmt man trotzdem 4,47?</div>
-    <div class="good hidden" id="r4b">Eine Seitenlänge ist nie negativ. Man hat festgelegt: <b>√ ist immer die nicht negative Lösung.</b></div>
+    <div class="good hidden" id="r4b">Seitenlängen sind nie negativ. Festgelegt: <b>√ ist nie negativ.</b></div>
     <div class="merk">
       <h3>📌 Merksatz</h3>
-      <b>√a</b> ist die nicht negative Zahl, die mit sich selbst multipliziert <b>a</b> ergibt.<br>
-      Die Zahl unter der Wurzel heißt <b>Radikand</b>. Beispiele: √16 = 4, weil 4 · 4 = 16. √20 ≈ 4,47.<br>
-      <b>Probe:</b> Ergebnis mit sich selbst malnehmen, dann muss der Radikand herauskommen.
+      <b>√a</b> ist die nicht negative Zahl, die mit sich selbst malgenommen <b>a</b> ergibt. <b>a</b> heißt <b>Radikand</b>.<br>
+      √16 = 4, weil 4 · 4 = 16. √20 ≈ 4,47.<br>
+      <b>Probe:</b> Ergebnis · Ergebnis = Radikand.
     </div>
   </section>
 
@@ -138,20 +164,27 @@
     <h2>Stimmt das?</h2>
     <div class="big">√(9 + 16) = √9 + √16</div>
     <div class="yn"><button class="btn" data-yn="yes">Ja, stimmt</button><button class="btn" data-yn="no">Nein</button></div>
-    <div id="f6a" class="hidden">
+    <div id="f6a" class="hidden grow">
       <p id="f6a-text"></p>
-      <p>Schau es dir an Quadraten an: Die Flächen 9 und 16 zusammen ergeben 25. Ein Quadrat mit 25 m² hat aber die Seite <b>5</b>, nicht 3 + 4 = 7.</p>
+      <p>An Quadraten: 9 m² + 16 m² = 25 m². Dieses Quadrat hat die Seite <b>5</b>, nicht 3 + 4 = 7.</p>
       <svg class="board" id="sq6" viewBox="0 0 320 230" aria-label="Quadrate 9, 16 und 25"></svg>
       <div class="merk"><b>Achtung:</b> √(a + b) ist nicht √a + √b. Bei Summen erst rechnen, dann die Wurzel ziehen.</div>
-      <div class="task" id="t6b">Und das hier? Was ist <b>√(−4)</b>?</div>
-      <div class="yn"><button class="btn" data-neg="2">2</button><button class="btn" data-neg="-2">−2</button><button class="btn" data-neg="none">gibt es nicht</button></div>
-      <p id="f6b"></p>
     </div>
+  </section>
+
+  <!-- 7 Negative Zahl -->
+  <section class="card step" data-title="Negative Zahl">
+    <div class="kicker">Schritt 7 · Noch eine Falle</div>
+    <h2>Wurzel aus einer negativen Zahl?</h2>
+    <div class="big">√(−4) = ?</div>
+    <div class="task" id="t6b">Welche Zahl ergibt mit sich selbst malgenommen −4?</div>
+    <div class="yn"><button class="btn" data-neg="2">2</button><button class="btn" data-neg="-2">−2</button><button class="btn" data-neg="none">gibt es nicht</button></div>
+    <p id="f6b" style="margin-top:6px"></p>
   </section>
 
   <!-- 7 Check -->
   <section class="card step" data-title="Check">
-    <div class="kicker">Schritt 7 · Kannst du es?</div>
+    <div class="kicker">Schritt 8 · Kannst du es?</div>
     <h2>Abschluss-Check</h2>
     <div id="check-box"></div>
   </section>
@@ -204,7 +237,7 @@ function show(i) {
   $("next").disabled = !ready[i];
   $("next").classList.toggle("pulse", ready[i] && i < steps.length - 1);
   $("next").textContent = i === steps.length - 1 ? "Fertig ✓" : "Weiter →";
-  scrollTo({ top: 0, behavior: "smooth" });
+  steps[i].scrollTop = 0;
   if (inits[i]) { inits[i](); inits[i] = null; }
 }
 function unlock(i, msg) {
@@ -262,7 +295,7 @@ function step2() {
   $("s2-out").textContent = `${s} m · ${s} m = ${A} m²`;
   $("s2-out").className = "live";
   if (t2 < 2 && A === tasks2[t2][1]) {
-    $(tasks2[t2][0]).classList.add("done");
+    $(tasks2[t2][0]).classList.add("done", "fold");
     t2++;
     $(tasks2[t2][0]).classList.remove("todo");
     $("s2-out").classList.add("hit");
@@ -270,7 +303,7 @@ function step2() {
   }
   if (t2 === 2) {
     if (A === 16 || A === 25) {
-      $("s2-fb").innerHTML = `<div class="hint">Mit ganzen Metern springt die Fläche von <b>16 m²</b> direkt auf <b>25 m²</b>. 20 m² liegt dazwischen. Die Seite muss also eine Kommazahl zwischen 4 und 5 sein.</div>`;
+      $("s2-fb").innerHTML = `<div class="hint">Klappt nicht! Von <b>16 m²</b> springt es direkt auf <b>25 m²</b>. Die Seite muss eine Kommazahl zwischen 4 und 5 sein.</div>`;
       $("t2c").classList.add("done");
       unlock(1);
     }
@@ -298,6 +331,8 @@ function step3() {
     $("t3a").innerHTML += ` 4,4 · 4,4 = 19,36 ist zu klein, 4,5 · 4,5 = 20,25 ist zu groß. Die Seite liegt also zwischen 4,4 und 4,5.`;
     $("t3b").classList.remove("hidden", "todo");
     $("s3f-wrap").classList.remove("hidden");
+    $("s3").closest("label").classList.add("hidden");
+    $("s3-intro").classList.add("hidden");
     Juice.sfx.good();
   }
 }
@@ -307,7 +342,8 @@ function step3f() {
   const d = live3(s);
   if (phase3 === 1 && d < 0.05) {
     phase3 = 2;
-    $("t3b").classList.add("done");
+    $("t3b").classList.add("done", "fold");
+    $("t3a").classList.add("fold");
     $("s3-done").classList.remove("hidden");
     if (guess) {
       const err = Math.abs(guess - Math.sqrt(20));
@@ -360,7 +396,9 @@ document.querySelectorAll("[data-yn]").forEach((b) => b.onclick = () => {
     ? `<div class="hint">Das denken viele! Rechne nach: √(9 + 16) = √25 = <b>5</b>. Aber √9 + √16 = 3 + 4 = <b>7</b>.</div>`
     : `<div class="good">Richtig erkannt! √(9 + 16) = √25 = <b>5</b>, aber √9 + √16 = 3 + 4 = <b>7</b>.</div>`;
   yes ? Juice.sfx.bad() : Juice.sfx.good();
+  document.querySelectorAll("[data-yn]").forEach((x) => x.disabled = true);
   drawSix();
+  unlock(5);
 });
 function drawSix() {
   const s = $("sq6"); s.innerHTML = "";
@@ -386,7 +424,7 @@ document.querySelectorAll("[data-neg]").forEach((b) => b.onclick = () => {
   if (v === "none") {
     $("f6b").innerHTML = `<div class="good">Genau! 2 · 2 = 4 und (−2) · (−2) = 4. Keine Zahl ergibt mit sich selbst malgenommen −4. <b>√ einer negativen Zahl ist nicht definiert.</b></div>`;
     $("t6b").classList.add("done");
-    unlock(5);
+    unlock(6);
   } else {
     $("f6b").innerHTML = `<div class="hint">Mach die Probe: ${v === "2" ? "2 · 2" : "(−2) · (−2)"} = 4, nicht −4. Versuch es noch einmal.</div>`;
     Juice.sfx.bad();
@@ -421,7 +459,7 @@ function doCheck() {
     $("cf").innerHTML = `<div class="good">Richtig!</div>`;
     ci++; tries = 0;
     if (ci < checks.length) setTimeout(renderCheck, 900);
-    else { $("cf").innerHTML = `<div class="good"><b>Alle Aufgaben gelöst!</b> Du kannst Quadratwurzeln.</div>`; Juice.confetti(); unlock(6); }
+    else { $("cf").innerHTML = `<div class="good"><b>Alle Aufgaben gelöst!</b> Du kannst Quadratwurzeln.</div>`; Juice.confetti(); unlock(7); }
   } else {
     tries++;
     Juice.sfx.bad(); Juice.shake($("check-box"));
@@ -430,12 +468,12 @@ function doCheck() {
       const sol = ["7 und 8", "0,5", "5,5", "10"][ci];
       $("cf").innerHTML = `<div class="hint">Lösung: <b>${sol}</b>. Schau dir die Aufgabe noch einmal in Ruhe an.</div>`;
       ci++; tries = 0;
-      if (ci < checks.length) setTimeout(renderCheck, 2200); else { unlock(6); }
+      if (ci < checks.length) setTimeout(renderCheck, 2200); else { unlock(7); }
     };
   }
 }
-inits[6] = renderCheck;
-inits[7] = () => { ready[7] = true; $("next").disabled = false; Juice.achieve("lektion_wurzel"); };
+inits[7] = renderCheck;
+inits[8] = () => { ready[8] = true; $("next").disabled = false; Juice.achieve("lektion_wurzel"); };
 
 show(0);
 </script>
