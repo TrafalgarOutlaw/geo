@@ -114,3 +114,74 @@ input.answer {
 .f2 { color: var(--accent2); font-weight: 700; }
 sup { font-size: 0.7em; }
 footer { margin-top: 1.5rem; font-size: 0.8rem; color: var(--muted); }
+
+/* ---------- Juice: frischer Look ---------- */
+body { font-family: "Nunito", system-ui, -apple-system, "Segoe UI", sans-serif; padding-top: 58px; }
+h1 {
+  font-size: 2rem; font-weight: 900;
+  background: linear-gradient(90deg, var(--accent), #e84393 55%, var(--accent2));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+h2 { font-weight: 800; }
+section.card, a.chapter { box-shadow: 0 4px 18px rgba(0, 0, 0, 0.06); border-radius: 18px; }
+a.chapter { border-left: 6px solid var(--accent); }
+a.chapter:nth-of-type(2) { border-left-color: var(--accent2); }
+.big { border-radius: 14px; transition: background 0.3s; }
+.chips button, button.btn { font-weight: 700; transition: transform 0.08s; }
+.chips button:active, button.btn:active { transform: scale(0.93); }
+button.btn:disabled { opacity: 0.4; }
+label.slider input { height: 36px; }
+input[type=range] { accent-color: var(--accent); }
+
+/* Karten einblenden */
+.j-hide { opacity: 0; transform: translateY(24px); }
+.j-in { opacity: 1; transform: none; transition: opacity 0.5s, transform 0.5s cubic-bezier(.2,1.4,.4,1); }
+
+/* Animationen */
+@keyframes j-bump { 0% { transform: scale(1); } 35% { transform: scale(1.06); } 100% { transform: scale(1); } }
+@keyframes j-shake { 0%,100% { transform: translateX(0); } 20% { transform: translateX(-9px); } 40% { transform: translateX(8px); } 60% { transform: translateX(-6px); } 80% { transform: translateX(4px); } }
+@keyframes j-glow { 0% { box-shadow: 0 0 0 0 rgba(46,139,87,.7); } 100% { box-shadow: 0 0 0 18px rgba(46,139,87,0); } }
+@keyframes j-float { 0% { opacity: 0; transform: translate(-50%, 0) scale(.6); } 20% { opacity: 1; transform: translate(-50%, -20px) scale(1.15); } 100% { opacity: 0; transform: translate(-50%, -80px) scale(1); } }
+@keyframes j-flame { 0%,100% { transform: scale(1) rotate(-4deg); } 50% { transform: scale(1.15) rotate(4deg); } }
+.j-bump { animation: j-bump 0.25s ease-out; }
+.j-shake { animation: j-shake 0.4s; }
+.j-glow { animation: j-glow 0.7s; }
+.j-float { position: fixed; z-index: 60; pointer-events: none; font-weight: 900; font-size: 1.3rem; color: var(--accent2); animation: j-float 1.2s ease-out forwards; text-shadow: 0 2px 6px rgba(0,0,0,.15); }
+.j-float.xp { color: var(--ok); }
+.confetti { position: fixed; inset: 0; pointer-events: none; z-index: 70; }
+
+/* XP-Leiste */
+.j-bar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+  display: flex; align-items: center; gap: 8px; padding: 8px 12px;
+  background: color-mix(in srgb, var(--card) 88%, transparent);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--grid);
+}
+.j-lvl { font-weight: 900; font-size: 0.9rem; white-space: nowrap; color: var(--accent); }
+.j-xpwrap { flex: 1; position: relative; height: 18px; background: var(--grid); border-radius: 999px; overflow: hidden; }
+.j-xpfill { position: absolute; inset: 0 auto 0 0; background: linear-gradient(90deg, var(--accent), #e84393); border-radius: 999px; transition: width 0.5s cubic-bezier(.2,1.4,.4,1); }
+.j-xptext { position: relative; display: block; text-align: center; font-size: 0.72rem; font-weight: 800; line-height: 18px; color: var(--fg); }
+.j-btn { font: inherit; font-weight: 800; font-size: 0.9rem; border: 1px solid var(--grid); background: var(--bg); color: var(--fg); border-radius: 999px; padding: 4px 10px; cursor: pointer; white-space: nowrap; }
+
+/* Pop-ups */
+.j-toasts { position: fixed; left: 50%; bottom: 16px; transform: translateX(-50%); z-index: 65; display: flex; flex-direction: column; gap: 8px; width: min(92vw, 420px); pointer-events: none; }
+.j-toast {
+  display: flex; gap: 10px; align-items: center; padding: 10px 14px; border-radius: 16px;
+  background: var(--card); color: var(--fg); border: 2px solid var(--accent2);
+  box-shadow: 0 8px 30px rgba(0,0,0,.2); animation: j-in-up 0.45s cubic-bezier(.2,1.5,.4,1);
+  transition: opacity .4s, transform .4s;
+}
+.j-toast.out { opacity: 0; transform: translateY(20px); }
+@keyframes j-in-up { from { opacity: 0; transform: translateY(40px) scale(.9); } to { opacity: 1; transform: none; } }
+.j-ticon { font-size: 1.8rem; line-height: 1; }
+.j-overlay { position: fixed; inset: 0; z-index: 80; background: rgba(0,0,0,.45); display: flex; align-items: flex-end; justify-content: center; }
+.j-sheet { background: var(--card); width: min(100%, 520px); max-height: 85vh; overflow: auto; border-radius: 20px 20px 0 0; padding: 18px 16px; animation: j-in-up .35s; }
+.j-ach { display: flex; gap: 10px; align-items: center; padding: 8px; border-radius: 12px; opacity: .45; }
+.j-ach.got { opacity: 1; background: var(--fill2); }
+.j-ach + .j-ach { margin-top: 6px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .j-hide { opacity: 1; transform: none; }
+  .j-bump, .j-shake, .j-glow { animation: none; }
+}

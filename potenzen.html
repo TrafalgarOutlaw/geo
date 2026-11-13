@@ -4,7 +4,10 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Potenzen und Wurzeln – Geo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap">
   <link rel="stylesheet" href="style.css">
+  <script src="juice.js"></script>
   <style>
     .steps { width: 100%; border-collapse: collapse; margin: 8px 0; font-variant-numeric: tabular-nums; }
     .steps td { padding: 4px 6px; border-bottom: 1px solid var(--grid); text-align: center; }
@@ -35,6 +38,17 @@
     .layer { stroke: var(--accent); }
     .lm { fill: var(--fg); font-size: 12px; }
     .marker { fill: var(--accent2); }
+    .quiz-top { display: flex; justify-content: space-between; align-items: center; min-height: 2rem; }
+    .streak { font-weight: 900; color: var(--accent2); display: inline-block; transition: font-size .2s; }
+    .streak.hot { animation: j-flame .6s infinite; }
+    .blitzbar { position: relative; height: 26px; border-radius: 999px; background: var(--grid); overflow: hidden; margin: 8px 0; }
+    .blitzbar span { position: absolute; inset: 0 auto 0 0; background: linear-gradient(90deg, #f5c518, var(--accent2), #e84393); }
+    .blitzbar b { position: relative; display: block; text-align: center; line-height: 26px; font-size: .85rem; }
+    button.btn.blitz, a.btn.blitz { border: none; color: #fff; font-size: 1.05rem; padding: 10px 18px;
+      background: linear-gradient(90deg, #f5a623, #e84393); box-shadow: 0 4px 14px rgba(232, 67, 147, .35); }
+    #q { min-height: 2.2em; }
+    .newdot { transform-box: fill-box; transform-origin: center; animation: j-dot .4s cubic-bezier(.2,1.6,.4,1) both; }
+    @keyframes j-dot { from { transform: scale(0); } to { transform: scale(1); } }
   </style>
 </head>
 <body>
@@ -42,6 +56,7 @@
   <a class="back" href="./">← Alle Kapitel</a>
   <h1>Potenzen und Wurzeln</h1>
   <p class="lead">Klasse 9 Realschule. Verschieb die Regler und beobachte, was passiert.</p>
+  <a class="btn blitz" href="#ueben" style="display:inline-block;text-decoration:none;margin:4px 0 8px">⚡ Direkt zur Blitzrunde</a>
   <nav class="toc">
     <a href="#potenz">Potenz</a><a href="#punkte">Punktmuster</a><a href="#falten">Papier falten</a><a href="#gesetze">Potenzgesetze</a>
     <a href="#wurzel">Wurzeln</a><a href="#spirale">Wurzelspirale</a><a href="#heron">Heron</a><a href="#graphen">Graphen</a>
@@ -171,6 +186,7 @@
   <!-- 6 -->
   <section class="card" id="ueben">
     <h2>Üben</h2>
+    <div class="quiz-top"><span id="streak" class="streak"></span><span class="muted">Richtig: <b id="score">0</b> / <b id="total">0</b></span></div>
     <div class="chips" id="ex-chips">
       <button data-t="all" class="on">Gemischt</button>
       <button data-t="pot">Potenzen</button>
@@ -178,14 +194,17 @@
       <button data-t="root">Wurzeln</button>
       <button data-t="sci">Zehnerpotenzen</button>
     </div>
+    <div class="blitzbar" id="blitzbar" hidden><span id="blitzfill"></span><b id="blitzinfo"></b></div>
     <div id="q"></div>
     <div class="row">
       <input class="answer" id="ans" inputmode="decimal" autocomplete="off" placeholder="Antwort">
       <button class="btn primary" id="check">Prüfen</button>
-      <button class="btn" id="next">Neue Aufgabe</button>
+      <button class="btn" id="next">Überspringen</button>
     </div>
     <p id="fb"></p>
-    <p class="muted">Richtig: <b id="score">0</b> von <b id="total">0</b>. Brüche darfst du als 1/8 eingeben, Kommazahlen mit Komma.</p>
+    <button class="btn blitz" id="blitz">⚡ Blitzrunde: 60 Sekunden</button>
+    <p class="muted" id="best"></p>
+    <p class="muted">Brüche darfst du als 1/8 eingeben, Kommazahlen mit Komma. Jede richtige Antwort gibt XP, eine Serie gibt Bonus.</p>
   </section>
 
   <footer>Geo · Kapitel Potenzen und Wurzeln</footer>
@@ -193,6 +212,7 @@
 
 <script>
 const $ = (id) => document.getElementById(id);
+let booted = false;
 const NS = "http://www.w3.org/2000/svg";
 const de = (v, d = 6) => Number(v).toLocaleString("de-DE", { maximumFractionDigits: d }).replace("-", "−");
 const sup = (e) => `<sup>${String(e).replace("-", "−")}</sup>`;
@@ -233,6 +253,8 @@ function drawPot() {
     }
   } else rows = `<tr><td>Mit der Basis 0 kann man nicht teilen.</td></tr>`;
   $("p-steps").innerHTML = rows;
+  if (booted && a !== 0 && n === 0) Juice.achieve("null");
+  if (booted && a !== 0 && n < 0) Juice.achieve("negativ");
 }
 ["pa", "pn"].forEach((id) => $(id).addEventListener("input", drawPot));
 drawPot();
@@ -300,6 +322,7 @@ function drawRoot() {
     if (side > 0.8) el("text", { x: ox + side * U / 2 - 14, y: oy - side * U - 6, class: "dim" }, s).textContent = de(side, 2);
     const k = Math.floor(side);
     $("r-out").innerHTML = `√${v} ${Number.isInteger(side) ? "=" : "≈"} ${de(side, 4)}`;
+    if (booted && Number.isInteger(side) && side >= 2) { Juice.sfx.good(); Juice.confettiAt($("r-out"), 25, 0.5); Juice.floatText($("r-out"), `${side} · ${side} = ${v}`); Juice.achieve("glatt"); }
     $("r-hint").innerHTML = Number.isInteger(side)
       ? `${v} ist eine Quadratzahl: ${side} · ${side} = ${v}. Die Wurzel ist eine glatte Zahl.`
       : `${v} liegt zwischen den Quadratzahlen ${k * k} und ${(k + 1) ** 2}, also liegt √${v} zwischen ${k} und ${k + 1}. Probe: ${de(side, 4)} · ${de(side, 4)} ≈ ${de(side * side, 3)}`;
@@ -321,6 +344,7 @@ function drawRoot() {
     const isInt = Math.abs(side - Math.round(side)) < 1e-9;
     const k = Math.floor(side + 1e-9);
     $("r-out").innerHTML = `∛${v} ${isInt ? "=" : "≈"} ${de(side, 4)}`;
+    if (booted && isInt && v >= 8) { Juice.sfx.good(); Juice.confettiAt($("r-out"), 25, 0.5); Juice.floatText($("r-out"), `${Math.round(side)}³ = ${v}`); Juice.achieve("wuerfel"); }
     $("r-hint").innerHTML = isInt
       ? `${v} ist eine Kubikzahl: ${Math.round(side)} · ${Math.round(side)} · ${Math.round(side)} = ${v}.`
       : `${v} liegt zwischen den Kubikzahlen ${k ** 3} und ${(k + 1) ** 3}, also liegt ∛${v} zwischen ${k} und ${k + 1}.`;
@@ -361,6 +385,7 @@ const examples = {
   "11": "Abstand Erde–Sonne: etwa 1,5 · 10¹¹ m",
   "12": "tera = 10¹², z. B. 1 Terabyte",
 };
+const zSeen = {};
 function drawZ() {
   const k = +$("zk").value;
   $("zk-v").textContent = num(k);
@@ -370,6 +395,7 @@ function drawZ() {
   dec = k >= 0 ? Number(dec).toLocaleString("de-DE") : dec;
   const word = k > 0 ? `eine 1 mit ${k} Nullen` : k === 0 ? "einfach 1" : `das Komma steht ${-k} Stellen links von der 1`;
   $("zk-out").innerHTML = `10${sup(k)} = ${dec}`;
+  if (booted) { if (k === -10) zSeen.lo = true; if (k === 12) zSeen.hi = true; if (zSeen.lo && zSeen.hi) Juice.achieve("zehner"); }
   $("zk-ex").textContent = `${word[0].toUpperCase() + word.slice(1)}. ` + (examples[k] || "");
 }
 $("zk").addEventListener("input", drawZ);
@@ -431,7 +457,7 @@ const gens = {
     return { q: `${de(m * Math.pow(10, k), 10)} = ${de(m)} · 10<sup>?</sup>`, a: k };
   },
 };
-let exType = "all", cur = null, score = 0, total = 0, answered = false;
+let exType = "all", cur = null, score = 0, total = 0, answered = false, streak = 0, blitz = null;
 document.querySelectorAll("#ex-chips button").forEach((b) => b.addEventListener("click", () => {
   exType = b.dataset.t;
   document.querySelectorAll("#ex-chips button").forEach((x) => x.classList.toggle("on", x === b));
@@ -442,20 +468,85 @@ function newQ() {
   cur = gens[t]();
   answered = false;
   $("q").innerHTML = cur.q;
+  Juice.bump($("q"));
   $("ans").value = ""; $("fb").innerHTML = "";
+  if (blitz) $("ans").focus({ preventScroll: true });
 }
-function check() {
-  if (!cur) return;
-  const v = parseDe($("ans").value);
-  if (isNaN(v)) { $("fb").innerHTML = `<span class="bad">Bitte eine Zahl eingeben.</span>`; return; }
-  const ok = Math.abs(v - cur.a) < 1e-9 * Math.max(1, Math.abs(cur.a));
-  if (!answered) { total++; if (ok) score++; answered = true; }
+function renderStreak() {
+  const e = $("streak");
+  e.textContent = streak >= 2 ? `🔥 ${streak} in Folge` : "";
+  e.style.fontSize = 1 + Math.min(streak, 12) * 0.07 + "rem";
+  e.classList.toggle("hot", streak >= 5);
   $("score").textContent = score; $("total").textContent = total;
-  $("fb").innerHTML = ok ? `<span class="ok">Richtig!</span>` : `<span class="bad">Leider falsch.</span> Richtig ist ${de(cur.a, 8)}.`;
 }
+const praise = ["Richtig!", "Stark!", "Genau!", "Volltreffer!", "Mega!", "Sauber!", "Läuft bei dir!"];
+function check() {
+  if (!cur || answered) return;
+  const v = parseDe($("ans").value);
+  if (isNaN(v)) { Juice.shake($("ans")); $("fb").innerHTML = `<span class="bad">Bitte eine Zahl eingeben.</span>`; return; }
+  const ok = Math.abs(v - cur.a) < 1e-9 * Math.max(1, Math.abs(cur.a));
+  answered = true; total++;
+  const card = $("ueben");
+  if (ok) {
+    score++; streak++;
+    Juice.sfx.good(); Juice.glow(card); Juice.vibrate(20);
+    Juice.confettiAt($("check"), 25 + Math.min(streak, 10) * 6, 0.6);
+    Juice.addXP((blitz ? 5 : 10) + Math.min(streak, 10) * 2, $("check"));
+    $("fb").innerHTML = `<span class="ok">${pick(praise)}</span>` + (streak >= 3 ? ` <b>Serie ×${streak}</b>` : "");
+    Juice.achieve("erste");
+    if (streak >= 5) Juice.achieve("streak5");
+    if (streak >= 10) Juice.achieve("streak10");
+    if (blitz) { blitz.pts++; updBlitz(); }
+    setTimeout(() => { if (answered) newQ(); }, blitz ? 400 : 1000);
+  } else {
+    streak = 0;
+    Juice.sfx.bad(); Juice.shake(card); Juice.vibrate(150);
+    $("fb").innerHTML = `<span class="bad">Leider falsch.</span> Richtig ist ${de(cur.a, 8)}.`;
+    if (blitz) setTimeout(() => { if (answered) newQ(); }, 1100);
+  }
+  renderStreak();
+}
+function updBlitz() {
+  const left = Math.max(0, blitz.end - Date.now());
+  $("blitzfill").style.width = (left / 600) + "%";
+  $("blitzinfo").textContent = `⏱ ${Math.ceil(left / 1000)} s · ${blitz.pts} Punkte`;
+  if (left <= 0) endBlitz();
+  else if (left < 10000 && Math.ceil(left / 1000) !== blitz.lastSec) { blitz.lastSec = Math.ceil(left / 1000); Juice.sfx.tick(0.9); }
+}
+function startBlitz() {
+  if (blitz) return;
+  blitz = { end: Date.now() + 60000, pts: 0, timer: setInterval(updBlitz, 100) };
+  $("blitzbar").hidden = false; $("blitz").disabled = true;
+  streak = 0; renderStreak();
+  Juice.sfx.whoosh();
+  $("ueben").scrollIntoView({ behavior: "smooth", block: "start" });
+  newQ(); updBlitz();
+}
+function endBlitz() {
+  clearInterval(blitz.timer);
+  const pts = blitz.pts, best = Juice.best();
+  blitz = null;
+  $("blitzbar").hidden = true; $("blitz").disabled = false;
+  answered = true;
+  if (pts > best) {
+    Juice.setBest(pts);
+    Juice.sfx.fanfare(); Juice.confetti(undefined, undefined, 180, 1.3);
+    Juice.toast("🏅", "Neuer Rekord!", `${pts} Punkte in 60 Sekunden`);
+  } else {
+    Juice.sfx.good();
+    Juice.toast("⏱", "Zeit um!", `${pts} Punkte · Rekord: ${best}`);
+  }
+  $("fb").innerHTML = `<b>Blitzrunde vorbei: ${pts} Punkte.</b> Nochmal?`;
+  if (pts >= 10) Juice.achieve("blitz10");
+  if (pts >= 20) Juice.achieve("blitz20");
+  showBest();
+}
+function showBest() { const b = Juice.best(); $("best").textContent = b ? `Dein Rekord: ${b} Punkte` : "Noch kein Rekord. Schaffst du 10 Punkte?"; }
 $("check").addEventListener("click", check);
-$("next").addEventListener("click", newQ);
+$("next").addEventListener("click", () => { if (!answered) { streak = 0; renderStreak(); } newQ(); });
+$("blitz").addEventListener("click", startBlitz);
 $("ans").addEventListener("keydown", (e) => { if (e.key === "Enter") { answered ? newQ() : check(); } });
+showBest();
 newQ();
 
 /* ---------- Quadratzahlen als Punktmuster ---------- */
@@ -467,11 +558,13 @@ function drawDots() {
   for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) {
     const k = Math.max(i, j);
     const off = (320 - (n - 1) * G) / 2;
-    el("circle", { cx: off + j * G, cy: 320 - off - i * G, r: 9, class: k % 2 ? "dot2" : "dot1" }, s);
+    const c = el("circle", { cx: off + j * G, cy: 320 - off - i * G, r: 9, class: (k % 2 ? "dot2" : "dot1") + (booted && k === n - 1 ? " newdot" : "") }, s);
+    if (booted && k === n - 1) c.style.animationDelay = (i + j) * 25 + "ms";
   }
   const terms = [];
   for (let k = 0; k < n; k++) terms.push(`<span class="${k % 2 ? "f2" : "f1"}">${2 * k + 1}</span>`);
   $("dots-out").innerHTML = `${terms.join(" + ")} = ${n}² = ${n * n}`;
+  if (booted) { Juice.sfx.pop(n / 10); if (n === 10) Juice.achieve("punkte"); }
 }
 $("dn").addEventListener("input", drawDots);
 drawDots();
@@ -488,8 +581,25 @@ function fmtLen(m) {
   if (m < 1000) return de(m, 1) + " m";
   return de(m / 1000, 0) + " km";
 }
+const lmIcons = ["📄", "📚", "🧍", "🗼", "🏔️", "🛰️", "🌙", "☀️"];
+let lastFold = null;
 function drawFold() {
   const k = +$("fk").value, s = $("fold-svg");
+  if (booted && lastFold !== null && k !== lastFold) {
+    const mOld = 0.0001 * Math.pow(2, lastFold), mNew = 0.0001 * Math.pow(2, k);
+    if (k > lastFold) {
+      Juice.sfx.whoosh(); Juice.bump(s);
+      landmarks.forEach(([v, name], i) => {
+        if (mOld < v && mNew >= v && i > 0) {
+          Juice.toast(lmIcons[i], `${name[0].toUpperCase() + name.slice(1)} überholt!`, `Nach ${k}-mal Falten: ${fmtLen(mNew)}`);
+          Juice.sfx.good();
+          if (i === 6) Juice.achieve("mond");
+          if (i === 7) Juice.achieve("sonne");
+        }
+      });
+    } else Juice.sfx.pop(0.2);
+  }
+  lastFold = k;
   $("fk-v").textContent = k;
   s.innerHTML = "";
   const L = Math.pow(2, k), m = 0.0001 * L;
@@ -559,6 +669,8 @@ function drawSpiral() {
     if (Number.isInteger(root)) t.setAttribute("font-weight", "700");
   }
   const v = Math.sqrt(n + 1);
+  if (booted && Number.isInteger(v)) { Juice.sfx.good(); Juice.floatText($("sp-out"), `√${n + 1} = ${v}!`); }
+  if (booted && n === 17) Juice.achieve("spirale");
   $("sp-out").innerHTML = `Neue Hypotenuse: √${n + 1} ${Number.isInteger(v) ? "=" : "≈"} ${de(v, 4)}`;
   $("sp-hint").innerHTML = `Pythagoras: (√${n})² + 1² = ${n} + 1 = ${n + 1}, also ist die Hypotenuse √${n + 1}. Fett markiert sind die glatten Wurzeln √4, √9, √16.`;
 }
@@ -579,6 +691,13 @@ function heronStep() {
   H.b = H.A / H.a;
   H.rows.push([H.a, H.b]);
   drawHeron();
+  Juice.sfx.pop(H.rows.length / 9);
+  if (!H.done && Math.abs(H.a - H.b) < 1e-4) {
+    H.done = true;
+    Juice.sfx.good(); Juice.confettiAt($("heron-svg"), 60, 0.8);
+    Juice.floatText($("heron-svg"), "Quadrat erreicht!");
+    Juice.achieve("heron");
+  }
 }
 function drawHeron() {
   const s = $("heron-svg");
@@ -613,8 +732,10 @@ const funcs = {
   "-1": { f: (x) => 1 / x, inv: "y = 1/x (sich selbst!)", name: "y = x⁻¹ = 1/x", xmin: 0.3, xmax: 3.4 },
 };
 let gn = "2";
+const gTried = new Set(["2"]);
 document.querySelectorAll("#g-chips button").forEach((b) => b.addEventListener("click", () => {
   gn = b.dataset.n;
+  if ($("g-mirror").checked) { gTried.add(gn); if (gTried.size === 4) Juice.achieve("spiegel"); }
   document.querySelectorAll("#g-chips button").forEach((x) => x.classList.toggle("on", x === b));
   const F = funcs[gn], g = $("gx");
   g.min = F.xmin; g.max = F.xmax;
@@ -664,7 +785,7 @@ function drawGraph() {
 $("gx").addEventListener("input", drawGraph);
 $("g-mirror").addEventListener("change", drawGraph);
 drawGraph();
-
+booted = true;
 </script>
 </body>
 </html>

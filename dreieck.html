@@ -4,7 +4,10 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Dreieck – Geo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap">
   <link rel="stylesheet" href="style.css">
+  <script src="juice.js"></script>
   <style>
     .grid line { stroke: var(--grid); stroke-width: 1; }
     .tri { fill: var(--fill); stroke: var(--accent); stroke-width: 3; stroke-linejoin: round; }
@@ -88,9 +91,12 @@
   svg.addEventListener("pointermove", (e) => {
     if (dragging < 0) return;
     const p = toSvg(e);
-    pts[dragging].x = Math.min(400, Math.max(0, Math.round(p.x / STEP) * STEP));
-    pts[dragging].y = Math.min(300, Math.max(0, Math.round(p.y / STEP) * STEP));
-    draw();
+    const nx = Math.min(400, Math.max(0, Math.round(p.x / STEP) * STEP));
+    const ny = Math.min(300, Math.max(0, Math.round(p.y / STEP) * STEP));
+    if (nx === pts[dragging].x && ny === pts[dragging].y) return;
+    pts[dragging].x = nx; pts[dragging].y = ny;
+    Juice.sfx.tick(ny / 300);
+    draw(true);
   });
   ["pointerup", "pointercancel"].forEach((ev) => svg.addEventListener(ev, () => (dragging = -1)));
 
@@ -102,7 +108,8 @@
     return Math.acos(cos) * 180 / Math.PI;
   }
 
-  function draw() {
+  let wasRight = false;
+  function draw(user) {
     tri.setAttribute("points", pts.map((p) => `${p.x},${p.y}`).join(" "));
     const cx = (pts[0].x + pts[1].x + pts[2].x) / 3;
     const cy = (pts[0].y + pts[1].y + pts[2].y) / 3;
@@ -122,6 +129,11 @@
     document.getElementById("sum").textContent = fmt(a + b + c);
     const area = Math.abs((B.x - A.x) * (C.y - A.y) - (C.x - A.x) * (B.y - A.y)) / 2 / (STEP * STEP);
     document.getElementById("area").textContent = area.toFixed(1).replace(".", ",");
+    if (user) {
+      const right = [a, b, c].some((w) => Math.abs(w - 90) < 0.05);
+      if (right && !wasRight) { Juice.sfx.good(); Juice.bump(document.querySelector(".stats")); Juice.toast("📐", "Rechter Winkel!", "Genau 90°"); Juice.achieve("rechter"); }
+      wasRight = right;
+    }
   }
   draw();
 </script>
