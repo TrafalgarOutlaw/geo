@@ -1,0 +1,77 @@
+/* Geo – gemeinsames Layout für geführte Lernpfade: ein Schritt = ein Bildschirm */
+/* Ein Schritt = ein Bildschirm: Seite füllt genau die Höhe, nur der Schritt passt sich an */
+html, body { height: 100%; }
+body {
+  height: 100vh; height: 100dvh; overflow: hidden;
+  display: flex; flex-direction: column;
+  padding: 50px 10px 0; line-height: 1.35;
+}
+main { flex: 1; min-height: 0; width: 100%; display: flex; flex-direction: column; }
+.lhead { display: flex; align-items: baseline; gap: 10px; margin: 4px 2px 0; }
+.lhead .back { margin: 0; font-size: .9rem; white-space: nowrap; }
+.lhead h1 { font-size: 1.15rem; margin: 0; flex: 1; text-align: right; }
+section.card.step { display: none; }
+section.card.step.active {
+  display: flex; flex-direction: column; flex: 1; min-height: 0;
+  margin: 6px 0; padding: 10px 14px; overflow-y: auto; animation: j-in-up .35s;
+}
+.step > * { flex-shrink: 0; }
+.step p { margin: 0 0 .45rem; }
+.step h2 { font-size: 1.1rem; margin-bottom: .3rem; }
+/* Grafiken nehmen den restlichen Platz und schrumpfen bei kleinen Handys */
+.step svg.board { flex: 1 1 0; min-height: 90px; max-height: 300px; width: 100%; height: auto; margin: 4px 0; }
+.step label.slider { margin: 2px 0; display: flex; align-items: center; gap: 4px; white-space: nowrap; }
+.step label.slider b { min-width: 2.6em; display: inline-block; }
+.step label.slider input { height: 30px; flex: 1; min-width: 0; margin-left: 6px; }
+@media (max-height: 680px) { .lhead { display: none; } section.card.step.active { margin-top: 2px; } }
+@media (max-height: 760px) { .step { font-size: .94rem; } .step h2 { font-size: 1.02rem; } .garden { font-size: 2rem; } }
+.step .big { margin: 6px 0; padding: 8px; }
+.j-toasts { bottom: 74px; }
+.kicker { font-size: .8rem; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: var(--accent2); }
+.task { border-left: 5px solid var(--accent); background: var(--fill); border-radius: 10px; padding: 6px 10px; margin: 5px 0; }
+.task.done { border-left-color: var(--ok); background: color-mix(in srgb, var(--ok) 14%, transparent); }
+.task.done::before { content: "✓ "; color: var(--ok); font-weight: 900; }
+.task.todo { opacity: .45; }
+.merk { border: 2px solid var(--accent2); background: var(--fill2); border-radius: 14px; padding: 8px 12px; margin: 6px 0; }
+.merk h3 { margin: 0 0 4px; font-size: 1rem; }
+.reveal { cursor: pointer; border: 2px dashed var(--accent); border-radius: 12px; padding: 7px 10px; margin: 6px 0; color: var(--accent); font-weight: 700; text-align: center; }
+.hidden { display: none !important; }
+.hint { background: color-mix(in srgb, var(--bad) 12%, transparent); border-radius: 10px; padding: 8px 12px; margin: 6px 0; }
+.good { background: color-mix(in srgb, var(--ok) 14%, transparent); border-radius: 10px; padding: 8px 12px; margin: 6px 0; }
+.live { font-size: 1.1rem; font-weight: 800; text-align: center; padding: 5px; border-radius: 10px; margin: 4px 0; transition: background .2s; }
+.live.lo { background: color-mix(in srgb, var(--accent) 18%, transparent); }
+.live.hi { background: color-mix(in srgb, var(--accent2) 22%, transparent); }
+.live.hit { background: color-mix(in srgb, var(--ok) 25%, transparent); }
+.cell { fill: var(--fill); stroke: var(--accent); stroke-width: .6; }
+.sqo { fill: none; stroke: var(--accent); stroke-width: 3; }
+.gridl { stroke: var(--grid); stroke-width: 1; }
+.axis { fill: var(--muted); font-size: 12px; }
+.dim { fill: var(--fg); font-size: 15px; font-weight: 800; }
+.yn { display: flex; gap: 8px; }
+.yn button { flex: 1; }
+.chain { display: flex; align-items: center; justify-content: center; gap: 6px; flex-wrap: wrap; font-weight: 800; font-size: 1.1rem; margin: 6px 0; }
+.chain .box { background: var(--fill); border-radius: 10px; padding: 6px 12px; }
+.chain { flex-wrap: nowrap; font-size: 1rem; gap: 4px; }
+.chain .arr { font-size: .68rem; color: var(--muted); text-align: center; line-height: 1.1; }
+.row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin: 6px 0; }
+.lessonnav {
+  flex-shrink: 0; margin: 0 -10px; z-index: 40; display: flex; align-items: center; gap: 8px;
+  padding: 8px 14px calc(8px + env(safe-area-inset-bottom)); background: color-mix(in srgb, var(--card) 92%, transparent); backdrop-filter: blur(8px);
+  border-top: 1px solid var(--grid);
+}
+.dots { flex: 1; display: flex; justify-content: center; gap: 4px; min-width: 0; overflow: hidden; }
+.dots i { flex-shrink: 0; width: 8px; height: 8px; border-radius: 50%; background: var(--grid); transition: all .2s; }
+.dots i.on { background: var(--accent); width: 18px; border-radius: 6px; }
+.lessonnav .btn { min-width: 44px; padding: 8px 12px; flex-shrink: 0; }
+#speak.on { background: var(--accent); color: var(--bg); }
+#next { white-space: nowrap; }
+@media (max-width: 380px) { .lessonnav { gap: 6px; padding-left: 10px; padding-right: 10px; } .lessonnav .btn { padding: 8px 10px; } .dots { gap: 3px; } .dots i { width: 6px; height: 6px; } .dots i.on { width: 14px; } }
+html.beamer body { padding-left: 24px; padding-right: 24px; }
+html.beamer .lessonnav { margin: 0 -24px; }
+.dots i.seen { background: var(--accent); opacity: .5; }
+#next[disabled] { opacity: .35; }
+#next.pulse { animation: j-glow 1.2s infinite; }
+.garden { font-size: 2.6rem; text-align: center; margin: 0; line-height: 1.2; }
+.task.done.fold { display: none; }
+.grow:not(.hidden) { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+.grow > * { flex-shrink: 0; }

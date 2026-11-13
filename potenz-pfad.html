@@ -1,0 +1,408 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lektion Potenzen – Geo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap">
+  <link rel="stylesheet" href="style.css">
+  <script src="juice.js"></script>
+  <script src="app.js"></script>
+  <link rel="stylesheet" href="lesson.css">
+  <style>
+    .hero { font-size: 2.6rem; text-align: center; margin: 0; line-height: 1.2; }
+    @media (max-height: 760px) { .hero { font-size: 2rem; } }
+    .layer { fill: #f3e6c8; stroke: #b9a27a; stroke-width: .8; }
+    :root[data-theme="dark"] .layer { fill: #5a5040; stroke: #a08a64; }
+    @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .layer { fill: #5a5040; stroke: #a08a64; } }
+    .eiffel { fill: var(--accent2); opacity: .85; }
+    .stack { fill: var(--accent); }
+    .lbl { fill: var(--fg); font-size: 13px; font-weight: 800; }
+    .lbl.m { fill: var(--muted); font-weight: 700; font-size: 11px; }
+    .prod { font-weight: 800; text-align: center; overflow-wrap: anywhere; }
+    .tiles { display: flex; justify-content: center; align-items: center; gap: 4px; flex-wrap: wrap; font-weight: 900; font-size: 1.15rem; margin: 6px 0; }
+    .tiles span { display: inline-flex; align-items: center; justify-content: center; min-width: 34px; height: 34px; border-radius: 8px; }
+    .tiles .a { background: var(--fill); color: var(--accent); }
+    .tiles .b { background: var(--fill2); color: var(--accent2); }
+    .tiles .op { min-width: 14px; color: var(--muted); }
+    table.zeilen { margin: 4px auto; border-collapse: collapse; font-size: 1.15rem; font-weight: 800; }
+    table.zeilen td { padding: 3px 10px; text-align: center; }
+    table.zeilen td.arr { font-size: .8rem; color: var(--muted); font-weight: 700; padding: 0 6px; }
+    table.zeilen tr.hidden { display: none; }
+    .term { font-size: 1.6rem; font-weight: 900; text-align: center; margin: 4px 0; }
+    .term .bas { color: var(--accent); }
+    .term .exp { color: var(--accent2); font-size: .6em; vertical-align: super; }
+    .legend { display: flex; justify-content: center; gap: 16px; font-size: .9rem; margin-bottom: 4px; }
+    .legend b.bas { color: var(--accent); }
+    .legend b.exp { color: var(--accent2); }
+    input.answer.sm { width: 4.2em; }
+  </style>
+</head>
+<body data-lesson="potenz-pfad">
+<main>
+  <div class="lhead"><a class="back" href="./">← Alle Kapitel</a><h1>Potenzen</h1></div>
+
+  <!-- 1 Einstieg -->
+  <section class="card step" data-title="Einstieg">
+    <div class="kicker">Schritt 1 · Das Problem</div>
+    <h2>Papier bis zum Eiffelturm?</h2>
+    <div class="hero">📄 ➜ 🗼</div>
+    <p>Ein Blatt Papier ist etwa <b>0,1 mm</b> dick. Stell dir vor, du könntest es <b>beliebig oft in der Mitte falten</b>. Bei jedem Falten wird der Stapel doppelt so dick.</p>
+    <p><b>Wie oft musst du falten, bis der Stapel höher ist als der Eiffelturm (330 m)?</b></p>
+    <div class="task" id="t-guess">Schätze zuerst, ohne zu rechnen:</div>
+    <div class="row"><input class="answer" id="guess" inputmode="numeric" placeholder="z. B. 1000"> <b>-mal</b> <button class="btn primary" id="guess-ok">Festhalten</button></div>
+    <p class="muted" id="guess-fb"></p>
+  </section>
+
+  <!-- 2 Falten -->
+  <section class="card step" data-title="Falten">
+    <div class="kicker">Schritt 2 · Ausprobieren</div>
+    <h2>Falten und Lagen zählen</h2>
+    <div class="row" style="justify-content:center"><button class="btn" id="f-minus" aria-label="Einmal weniger falten">−</button><button class="btn primary" id="f-plus">📄 Falten</button></div>
+    <svg class="board" id="f-svg" viewBox="0 0 300 200" aria-label="Papierstapel"></svg>
+    <div class="live" id="f-out"></div>
+    <div class="task" id="t2a">Auftrag 1: Falte, bis der Stapel <b>8 Lagen</b> hat.</div>
+    <div class="task todo" id="t2b">Auftrag 2: Falte weiter bis <b>64 Lagen</b>.</div>
+    <div class="task todo" id="t2c">Auftrag 3: Falte <b>10-mal</b>. Schau dir die Rechnung an!</div>
+    <p id="f-fb"></p>
+  </section>
+
+  <!-- 3 Merksatz -->
+  <section class="card step" data-title="Merksatz">
+    <div class="kicker">Schritt 3 · Das hast du entdeckt</div>
+    <h2>Die Potenz: eine Kurzschreibweise</h2>
+    <p>Statt <b>2 · 2 · 2 · 2 · 2</b> schreibt man kurz:</p>
+    <div class="term"><span class="bas">2</span><span class="exp">5</span> = 32</div>
+    <div class="legend"><span><b class="bas">2</b> = Basis</span><span><b class="exp">5</b> = Exponent</span></div>
+    <div class="reveal" data-target="r3a">Was sagt dir der Exponent 5? Erst überlegen, dann tippen.</div>
+    <div class="good hidden" id="r3a">Er sagt, <b>wie oft</b> die Basis 2 mit sich selbst malgenommen wird: 5-mal.</div>
+    <div class="reveal" data-target="r3b">Ist 2⁵ dasselbe wie 2 · 5?</div>
+    <div class="good hidden" id="r3b"><b>Nein!</b> 2⁵ = 2 · 2 · 2 · 2 · 2 = 32, aber 2 · 5 = 10.</div>
+    <div class="merk">
+      <h3>📌 Merksatz</h3>
+      <b>aⁿ = a · a · … · a</b> (n Faktoren). a heißt <b>Basis</b>, n heißt <b>Exponent</b>. Gelesen: „a hoch n“.<br>
+      a² heißt auch „a Quadrat“.
+    </div>
+  </section>
+
+  <!-- 4 Eiffelturm -->
+  <section class="card step" data-title="Eiffelturm">
+    <div class="kicker">Schritt 4 · Zurück zum Problem</div>
+    <h2>Wann ist der Eiffelturm erreicht?</h2>
+    <p>Nach k-mal Falten hat der Stapel <b>2<sup>k</sup></b> Lagen. Höhe = 0,1 mm · 2<sup>k</sup>.</p>
+    <label class="slider">k = <b id="e-v"></b><input type="range" id="e" min="0" max="25" step="1" value="10"></label>
+    <svg class="board" id="e-svg" viewBox="0 0 300 220" aria-label="Stapel und Eiffelturm"></svg>
+    <div class="live" id="e-out"></div>
+    <div class="task" id="t4">Auftrag: Finde die <b>kleinste</b> Zahl k, bei der der Stapel höher als 330 m ist.</div>
+    <div id="e-done" class="hidden"><div class="good"><span id="e-txt"></span> <span id="guess-compare"></span></div></div>
+  </section>
+
+  <!-- 5 Training -->
+  <section class="card step" data-title="Training">
+    <div class="kicker">Schritt 5 · Werkzeug schärfen</div>
+    <h2>Potenzen ausrechnen</h2>
+    <p>Rechne im Kopf. Tipp: Schreib dir die Faktoren auf. Löse 5 Aufgaben richtig.</p>
+    <div class="big" id="q5"></div>
+    <div class="row"><input class="answer" id="a5" inputmode="numeric" autocomplete="off" placeholder="Antwort"><button class="btn primary" id="c5">Prüfen</button></div>
+    <p id="f5"></p>
+    <p class="muted">Geschafft: <b id="n5">0</b> von 5</p>
+  </section>
+
+  <!-- 6 Stolperfalle -->
+  <section class="card step" data-title="Stolperfalle">
+    <div class="kicker">Schritt 6 · Stolperfalle</div>
+    <h2>Stimmt das?</h2>
+    <div class="big">3² = 6</div>
+    <div class="yn"><button class="btn" data-yn="yes">Ja, stimmt</button><button class="btn" data-yn="no">Nein</button></div>
+    <div id="f6" class="hidden grow">
+      <p id="f6-text"></p>
+      <svg class="board" id="sq6" viewBox="0 0 300 150" aria-label="3 mal 3 Punkte gegen 3 plus 3 Punkte"></svg>
+      <div class="merk"><b>Achtung:</b> Beim Potenzieren wird die Basis <b>mit sich selbst malgenommen</b>, nicht mit dem Exponenten.</div>
+    </div>
+  </section>
+
+  <!-- 7 Potenzgesetz -->
+  <section class="card step" data-title="Potenzgesetz">
+    <div class="kicker">Schritt 7 · Eine Regel entdecken</div>
+    <h2>Potenzen malnehmen</h2>
+    <div class="big" id="g-q">2³ · 2⁴ = ?</div>
+    <div class="tiles" id="g-tiles"></div>
+    <div class="task" id="t7a">Wie viele Zweien sind es zusammen? Also 2³ · 2⁴ = 2<sup>?</sup></div>
+    <div class="row" id="g-row"><span id="g-base" style="font-weight:900;font-size:1.2rem">2</span><sup style="margin-left:-6px"><input class="answer sm" id="g-a" inputmode="numeric" autocomplete="off" aria-label="Exponent"></sup><button class="btn primary" id="g-c">Prüfen</button></div>
+    <p id="g-f"></p>
+    <div class="merk hidden" id="g-merk"><h3>📌 Potenzgesetz</h3><b>aᵐ · aⁿ = aᵐ⁺ⁿ</b><br>Gleiche Basis: Die Exponenten werden <b>addiert</b>.</div>
+  </section>
+
+  <!-- 8 Hoch null -->
+  <section class="card step" data-title="Hoch null">
+    <div class="kicker">Schritt 8 · Ein Rätsel</div>
+    <h2>Was ist 2⁰?</h2>
+    <p>Null Faktoren, geht das überhaupt? Geh die Zeilen nach unten. Was passiert jedes Mal?</p>
+    <table class="zeilen" id="z-tab">
+      <tr><td>2⁴</td><td>=</td><td>16</td><td class="arr"></td></tr>
+      <tr class="hidden"><td>2³</td><td>=</td><td>8</td><td class="arr">↑ : 2</td></tr>
+      <tr class="hidden"><td>2²</td><td>=</td><td>4</td><td class="arr">↑ : 2</td></tr>
+      <tr class="hidden"><td>2¹</td><td>=</td><td>2</td><td class="arr">↑ : 2</td></tr>
+      <tr class="hidden"><td>2⁰</td><td>=</td><td><input class="answer sm" id="z-a" inputmode="numeric" autocomplete="off" aria-label="2 hoch 0"></td><td class="arr">↑ : 2</td></tr>
+    </table>
+    <div class="row" style="justify-content:center"><button class="btn primary" id="z-next">Nächste Zeile ↓</button><button class="btn primary hidden" id="z-c">Prüfen</button></div>
+    <p id="z-f"></p>
+    <div class="merk hidden" id="z-merk"><h3>📌 Merksatz</h3><b>a⁰ = 1</b> für jede Zahl a ≠ 0. Auch 10⁰ = 1 und 7⁰ = 1.</div>
+  </section>
+
+  <!-- 9 Check -->
+  <section class="card step" data-title="Check">
+    <div class="kicker">Schritt 9 · Kannst du es?</div>
+    <h2>Abschluss-Check</h2>
+    <div id="check-box"></div>
+  </section>
+
+  <!-- 10 Ende -->
+  <section class="card step" data-title="Geschafft">
+    <div class="kicker">Geschafft</div>
+    <h2>Bis zum Eiffelturm 🗼</h2>
+    <p>Nach <b>22-mal</b> Falten wäre der Stapel 0,1 mm · 2²² ≈ <b>419 m</b> hoch. In echt schafft man übrigens nur etwa 7-mal.</p>
+    <div class="merk">
+      <h3>Das nimmst du mit</h3>
+      • aⁿ = a · a · … · a, mit n Faktoren.<br>
+      • a ist die Basis, n der Exponent.<br>
+      • aⁿ ist nicht a · n: 3² = 9, nicht 6.<br>
+      • aᵐ · aⁿ = aᵐ⁺ⁿ bei gleicher Basis.<br>
+      • a⁰ = 1.
+    </div>
+    <p>Weiter: <a href="wurzel.html">🌻 Lernpfad Quadratwurzel</a> oder der <a href="potenzen.html#gesetze">Werkzeugkasten</a> mit allen Potenzgesetzen und der Blitzrunde.</p>
+  </section>
+</main>
+
+<nav class="lessonnav">
+  <button class="btn" id="prev" aria-label="Zurück">←</button>
+  <button class="btn" id="speak" aria-label="Schritt vorlesen">🔈</button>
+  <div class="dots" id="dots" aria-hidden="true"></div>
+  <button class="btn primary" id="next">Weiter →</button>
+</nav>
+
+<script src="lesson.js"></script>
+<script>
+/* Höhe 0,1 mm · 2^k lesbar machen */
+function height(k) {
+  const mm = 0.1 * 2 ** k;
+  if (mm < 10) return de(mm, 1) + " mm";
+  if (mm < 1000) return de(mm / 10, 1) + " cm";
+  if (mm < 1e6) return de(mm / 1000, 1) + " m";
+  return de(mm / 1e6, 1) + " km";
+}
+const product = (a, n) => n === 0 ? "1" : Array(n).fill(a).join(" · ");
+
+/* ---------- Schritt 1 ---------- */
+let guess = null;
+$("guess-ok").onclick = () => {
+  const g = parseDe($("guess").value);
+  if (!(g >= 0)) { Juice.shake($("guess")); $("guess-fb").textContent = "Gib eine Zahl ein. Raten ist erlaubt!"; return; }
+  guess = g;
+  $("t-guess").classList.add("done");
+  $("guess-fb").innerHTML = `Deine Schätzung: <b>${de(g, 0)}-mal</b>. Wir prüfen sie gleich. Weiter geht's!`;
+  unlock(0);
+};
+
+/* ---------- Schritt 2: Falten ---------- */
+let k2 = 0, t2 = 0;
+const tasks2 = [["t2a", 3], ["t2b", 6], ["t2c", 10]];
+function drawStack(k) {
+  const s = $("f-svg"); s.innerHTML = "";
+  const n = 2 ** k, base = 190, W = 160, x = 70;
+  if (n <= 64) {
+    const h = Math.min(16, 170 / n);
+    for (let i = 0; i < n; i++) el("rect", { x, y: base - (i + 1) * h, width: W, height: h, class: "layer" }, s);
+  } else {
+    el("rect", { x, y: 20, width: W, height: 170, class: "layer" }, s);
+    for (let i = 1; i < 34; i++) el("line", { x1: x, x2: x + W, y1: 20 + i * 5, y2: 20 + i * 5, stroke: "#b9a27a", "stroke-width": .5 }, s);
+  }
+  el("text", { x: x + W / 2, y: 14, class: "lbl", "text-anchor": "middle" }, s).textContent = `${de(n, 0)} Lagen · ${height(k)}`;
+}
+function step2() {
+  drawStack(k2);
+  const n = 2 ** k2;
+  $("f-out").innerHTML = k2 === 0 ? "Noch nicht gefaltet: 1 Lage" : `${k2}-mal gefaltet: <span class="prod">${product(2, k2)}</span> = <b>${de(n, 0)}</b> Lagen`;
+  $("f-out").className = "live";
+  if (t2 < 3 && k2 === tasks2[t2][1]) {
+    $(tasks2[t2][0]).classList.add("done", "fold");
+    t2++;
+    $("f-out").classList.add("hit");
+    if (t2 < 3) { $(tasks2[t2][0]).classList.remove("todo"); Juice.sfx.good(); Juice.floatText($("f-out"), "✓"); }
+    else {
+      $("f-fb").innerHTML = `<div class="hint">Puh, zehnmal die 2 hinschreiben ist mühsam! Und beim Eiffelturm wird es noch viel länger. Dafür gibt es eine <b>Kurzschreibweise</b>.</div>`;
+      unlock(1);
+    }
+  }
+}
+$("f-plus").onclick = () => { if (k2 < 10) { k2++; Juice.sfx.pop(k2 / 10); step2(); } };
+$("f-minus").onclick = () => { if (k2 > 0) { k2--; step2(); } };
+step2();
+
+/* ---------- Schritt 4: Eiffelturm ---------- */
+let found4 = false;
+function step4() {
+  const k = +$("e").value, s = $("e-svg"), m = 0.0001 * 2 ** k;
+  $("e-v").textContent = k;
+  s.innerHTML = "";
+  const base = 200, top = 24, maxM = 700, sc = (base - top) / maxM;
+  el("line", { x1: 20, x2: 280, y1: base, y2: base, class: "gridl" }, s);
+  // Eiffelturm als Trapez
+  const eh = 330 * sc;
+  el("polygon", { points: `170,${base} 230,${base} 203,${base - eh} 197,${base - eh}`, class: "eiffel" }, s);
+  el("text", { x: 200, y: base - eh - 6, class: "lbl", "text-anchor": "middle" }, s).textContent = "Eiffelturm 330 m";
+  const sh = Math.min(base - top, m * sc), over = m > maxM;
+  el("rect", { x: 70, y: base - Math.max(sh, 1), width: 40, height: Math.max(sh, 1), class: "stack", rx: 3 }, s);
+  el("text", { x: 90, y: base - Math.max(sh, 1) - 6, class: "lbl", "text-anchor": "middle" }, s).textContent = over ? "⬆ " + height(k) : height(k);
+  el("text", { x: 90, y: base + 14, class: "lbl m", "text-anchor": "middle" }, s).textContent = "Stapel";
+  const o = $("e-out");
+  o.innerHTML = `0,1 mm · 2${sup(k)} = ${height(k)} ` + (m > 330 ? (k === 22 ? "🎯" : "→ höher") : "→ zu niedrig");
+  o.className = "live " + (m > 330 ? (k === 22 ? "hit" : "hi") : "lo");
+  if (!found4 && k === 22) {
+    found4 = true;
+    $("t4").classList.add("done", "fold");
+    $("e-txt").innerHTML = `Bei 21-mal sind es erst 210 m, bei <b>22-mal</b> schon 419 m.`;
+    if (guess !== null) {
+      const err = Math.abs(guess - 22);
+      $("guess-compare").textContent = `Du hattest ${de(guess, 0)}-mal geschätzt, ` + (err <= 3 ? "richtig gut!" : err <= 10 ? "nicht schlecht." : "das ist weit weg. Potenzen wachsen schneller, als man denkt!");
+    }
+    $("e-done").classList.remove("hidden");
+    Juice.confettiAt(o, 50, 0.7);
+    unlock(3);
+  }
+}
+$("e").addEventListener("input", step4);
+step4();
+
+/* ---------- Schritt 5: Training ---------- */
+const pool5 = [[2, 3], [3, 2], [2, 5], [10, 3], [5, 2], [3, 3], [4, 2], [2, 4], [1, 8], [10, 4], [6, 2], [2, 6], [5, 3], [4, 3], [7, 2]];
+let n5 = 0, q5 = null;
+function new5() {
+  let q; do { q = pool5[Math.floor(Math.random() * pool5.length)]; } while (q === q5);
+  q5 = q;
+  $("q5").textContent = `${q[0]}${sup(q[1])} = ?`;
+  $("a5").value = ""; Juice.bump($("q5"));
+}
+function check5() {
+  const v = parseDe($("a5").value), [a, n] = q5, r = a ** n;
+  if (isNaN(v)) { Juice.shake($("a5")); return; }
+  if (v === r) {
+    n5++; $("n5").textContent = n5;
+    $("f5").innerHTML = `<span class="ok">Richtig!</span> ${product(a, n)} = ${de(r, 0)}`;
+    Juice.sfx.good();
+    if (n5 >= 5) { $("f5").innerHTML += " Stark!"; unlock(4); Juice.confettiAt($("q5"), 40, .6); return; }
+    setTimeout(new5, 800);
+  } else {
+    Juice.sfx.bad(); Juice.shake($("q5"));
+    $("f5").innerHTML = `<div class="hint">${v === a * n ? `Nicht ${a} · ${n}! ` : ""}Schreib die Faktoren auf: ${a}${sup(n)} = ${product(a, n)}.</div>`;
+  }
+}
+$("c5").onclick = check5;
+$("a5").addEventListener("keydown", (e) => e.key === "Enter" && check5());
+inits[4] = new5;
+
+/* ---------- Schritt 6: Stolperfalle ---------- */
+document.querySelectorAll("[data-yn]").forEach((b) => b.onclick = () => {
+  const yes = b.dataset.yn === "yes";
+  $("f6").classList.remove("hidden");
+  $("f6-text").innerHTML = yes
+    ? `<div class="hint">Das denken viele! Aber 3² = 3 · 3 = <b>9</b>. Die 6 kommt von 3 · 2.</div>`
+    : `<div class="good">Richtig erkannt! 3² = 3 · 3 = <b>9</b>, nicht 3 · 2 = 6.</div>`;
+  yes ? Juice.sfx.bad() : Juice.sfx.good();
+  document.querySelectorAll("[data-yn]").forEach((x) => x.disabled = true);
+  drawSix();
+  unlock(5);
+});
+function drawSix() {
+  const s = $("sq6"); s.innerHTML = "";
+  const dot = (x, y, cls) => el("circle", { cx: x, cy: y, r: 9, fill: cls }, s);
+  for (let r = 0; r < 3; r++) for (let c = 0; c < 3; c++) dot(40 + c * 26, 30 + r * 26, "var(--accent)");
+  el("text", { x: 66, y: 130, class: "lbl", "text-anchor": "middle" }, s).textContent = "3² = 3 · 3 = 9";
+  for (let r = 0; r < 2; r++) for (let c = 0; c < 3; c++) dot(200 + c * 26, 43 + r * 26, "var(--accent2)");
+  el("text", { x: 226, y: 130, class: "lbl", "text-anchor": "middle" }, s).textContent = "3 · 2 = 6";
+}
+
+/* ---------- Schritt 7: Potenzgesetz ---------- */
+const g7 = [{ a: 2, m: 3, n: 4 }, { a: 5, m: 2, n: 3 }];
+let gi = 0;
+function render7() {
+  const { a, m, n } = g7[gi];
+  $("g-q").textContent = `${a}${sup(m)} · ${a}${sup(n)} = ?`;
+  $("g-base").textContent = a;
+  $("g-tiles").innerHTML = gi === 0
+    ? `${Array(m).fill(`<span class="a">${a}</span>`).join('<span class="op">·</span>')}<span class="op">·</span>${Array(n).fill(`<span class="b">${a}</span>`).join('<span class="op">·</span>')}`
+    : "";
+  $("t7a").innerHTML = gi === 0
+    ? `Wie viele Zweien sind es zusammen? Also 2³ · 2⁴ = 2<sup>?</sup>`
+    : `Jetzt ohne Kästchen: ${a}${sup(m)} · ${a}${sup(n)} = ${a}<sup>?</sup>`;
+  $("t7a").classList.remove("done");
+  $("g-a").value = "";
+}
+function check7() {
+  const v = parseDe($("g-a").value), { a, m, n } = g7[gi];
+  if (isNaN(v)) { Juice.shake($("g-a")); return; }
+  if (v === m + n) {
+    Juice.sfx.good();
+    if (gi === 0) {
+      $("g-f").innerHTML = `<div class="good">Genau: 3 + 4 = 7 Zweien, also 2³ · 2⁴ = 2⁷ = 128.</div>`;
+      gi = 1; setTimeout(() => { render7(); }, 1400);
+    } else {
+      $("t7a").classList.add("done");
+      $("g-f").innerHTML = `<div class="good">Richtig: ${a}${sup(m)} · ${a}${sup(n)} = ${a}${sup(m + n)}. Die Exponenten werden addiert.</div>`;
+      $("g-row").classList.add("hidden"); $("g-tiles").classList.add("hidden"); $("t7a").classList.add("fold");
+      $("g-merk").classList.remove("hidden");
+      unlock(6);
+    }
+  } else {
+    Juice.sfx.bad(); Juice.shake($("g-a"));
+    $("g-f").innerHTML = `<div class="hint">${v === m * n ? "Nicht malnehmen! " : ""}Zähl die Faktoren: ${m} Stück und ${n} Stück.</div>`;
+  }
+}
+$("g-c").onclick = check7;
+$("g-a").addEventListener("keydown", (e) => e.key === "Enter" && check7());
+render7();
+
+/* ---------- Schritt 8: Hoch null ---------- */
+let zRow = 1;
+const zRows = [...$("z-tab").rows];
+$("z-next").onclick = () => {
+  zRows[zRow].classList.remove("hidden"); Juice.sfx.pop(zRow / 5);
+  zRow++;
+  if (zRow === 2) $("z-f").innerHTML = `<span class="muted">Der Exponent wird um 1 kleiner, und das Ergebnis …?</span>`;
+  if (zRow === 4) $("z-f").innerHTML = `<span class="muted">Jedes Mal wird durch 2 geteilt.</span>`;
+  if (zRow === 5) { $("z-next").classList.add("hidden"); $("z-c").classList.remove("hidden"); $("z-f").innerHTML = "Und jetzt? Teile noch einmal durch 2."; $("z-a").focus(); }
+};
+function checkZ() {
+  const v = parseDe($("z-a").value);
+  if (isNaN(v)) { Juice.shake($("z-a")); return; }
+  if (v === 1) {
+    $("z-f").innerHTML = `<div class="good">Genau: 2 : 2 = 1. Also ist <b>2⁰ = 1</b>.</div>`;
+    $("z-c").classList.add("hidden"); $("z-a").disabled = true;
+    $("z-merk").classList.remove("hidden");
+    unlock(7);
+  } else {
+    Juice.sfx.bad(); Juice.shake($("z-a"));
+    $("z-f").innerHTML = `<div class="hint">${v === 0 ? "Null wäre es, wenn man 2 − 2 rechnet. Hier wird aber geteilt: " : ""}Was ist 2 : 2?</div>`;
+  }
+}
+$("z-c").onclick = checkZ;
+$("z-a").addEventListener("keydown", (e) => e.key === "Enter" && checkZ());
+
+/* ---------- Schritt 9: Check ---------- */
+inits[8] = makeCheck("check-box", [
+  { q: "4³ = ?", mode: "numeric", ok: (v) => v === 64, sol: "64",
+    hint: (v) => v === 12 ? "Nicht 4 · 3! Rechne 4 · 4 · 4." : "4³ = 4 · 4 · 4. Erst 4 · 4 = 16, dann · 4." },
+  { q: "Schreibe als Potenz: 7 · 7 · 7 · 7 · 7 = 7<sup>?</sup>", mode: "numeric", ok: (v) => v === 5, sol: "7⁵, also 5",
+    hint: () => "Zähle, wie oft die 7 als Faktor vorkommt." },
+  { q: "3² · 3⁴ = 3<sup>?</sup>", mode: "numeric", ok: (v) => v === 6, sol: "3⁶, also 6",
+    hint: (v) => v === 8 ? "Nicht malnehmen! Bei gleicher Basis werden die Exponenten addiert." : "Gleiche Basis: Exponenten addieren, 2 + 4." },
+  { q: "10⁰ = ?", mode: "numeric", ok: (v) => v === 1, sol: "1",
+    hint: (v) => v === 0 ? "Denk an die Tabelle: 10¹ = 10, und dann noch einmal durch 10 teilen." : "Jede Zahl (außer 0) hoch 0 ergibt dasselbe. Was war 2⁰?" },
+], 8, "Du kannst mit Potenzen rechnen.");
+inits[9] = () => { ready[9] = true; $("next").disabled = false; Juice.achieve("lektion_potenz"); };
+
+lessonStart();
+</script>
+</body>
+</html>

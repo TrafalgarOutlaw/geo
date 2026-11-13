@@ -5,6 +5,7 @@ const App = (() => {
     set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
   };
   const CHAPTERS = [
+    { file: "potenz-pfad.html", icon: "🗼", title: "Lernpfad: Potenzen", lesson: "potenz-pfad" },
     { file: "wurzel.html", icon: "🌻", title: "Lernpfad: Die Quadratwurzel", lesson: "wurzel" },
     { file: "potenzen.html", icon: "🧮", title: "Potenzen und Wurzeln" },
     { file: "dreieck.html", icon: "📐", title: "Dreieck" },
@@ -60,7 +61,8 @@ const App = (() => {
     return text
       .replace(/√\s*\(/g, " Wurzel aus ( ").replace(/√/g, " Wurzel aus ")
       .replace(/·/g, " mal ").replace(/≈/g, " ungefähr ").replace(/≠/g, " ungleich ")
-      .replace(/²/g, " hoch 2 ").replace(/³/g, " hoch 3 ").replace(/m2\b/g, "Quadratmeter")
+      .replace(/m²/g, " Quadratmeter ").replace(/aᵐ⁺ⁿ/g, "a hoch m plus n").replace(/aᵐ/g, "a hoch m").replace(/aⁿ/g, "a hoch n")
+      .replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹]+/g, (m) => " hoch " + [...m].map((c) => "⁰¹²³⁴⁵⁶⁷⁸⁹".indexOf(c)).join("") + " ")
       .replace(/−/g, " minus ").replace(/</g, " kleiner als ").replace(/>/g, " größer als ")
       .replace(/→|←/g, " ").replace(/[📌✓✔🌱🌻🎯]/gu, " ");
   }
@@ -77,6 +79,7 @@ const App = (() => {
   function readVisible(el) {
     const clone = el.cloneNode(true);
     clone.querySelectorAll(".hidden, [hidden], svg, button, input, script, style").forEach((n) => n.remove());
+    clone.querySelectorAll("sup").forEach((n) => { n.textContent = " hoch " + n.textContent + " "; });
     return clone.innerText || clone.textContent;
   }
   function addReadButtons() {

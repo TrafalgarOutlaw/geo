@@ -25,6 +25,7 @@ const Juice = (() => {
     zehner:   ["🔭", "Vom Atom zum Tera", "10⁻¹⁰ und 10¹² besucht"],
     rechter:  ["📐", "Rechter Winkel", "Im Dreieck genau 90° eingestellt"],
     lektion_wurzel: ["🌻", "Beet geplant", "Lernpfad Quadratwurzel abgeschlossen"],
+    lektion_potenz: ["🗼", "Bis zum Eiffelturm", "Lernpfad Potenzen abgeschlossen"],
     level5:   ["🏆", "Level 5", "500 XP gesammelt"],
   };
   let prog = store.get("geo-progress", { xp: 0, ach: {}, best: 0 });
