@@ -3,168 +3,27 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Geo – Testseite</title>
-  <style>
-    :root {
-      --bg: #f7f7f4;
-      --fg: #1d1d1b;
-      --muted: #6b6b66;
-      --accent: #2f6fde;
-      --fill: rgba(47, 111, 222, 0.15);
-      --grid: #e2e2dc;
-    }
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --bg: #161615;
-        --fg: #ececea;
-        --muted: #9a9a94;
-        --accent: #6b9bff;
-        --fill: rgba(107, 155, 255, 0.18);
-        --grid: #2a2a28;
-      }
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      padding: 16px;
-      background: var(--bg);
-      color: var(--fg);
-      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-      line-height: 1.5;
-    }
-    main { max-width: 640px; margin: 0 auto; }
-    h1 { font-size: 1.6rem; margin: 0.5rem 0 0.25rem; }
-    p { color: var(--muted); margin: 0 0 1rem; }
-    svg {
-      width: 100%;
-      height: auto;
-      touch-action: none;
-      border-radius: 12px;
-      background: var(--bg);
-      outline: 1px solid var(--grid);
-    }
-    .grid line { stroke: var(--grid); stroke-width: 1; }
-    .tri { fill: var(--fill); stroke: var(--accent); stroke-width: 3; stroke-linejoin: round; }
-    .pt { fill: var(--accent); cursor: grab; }
-    .label { fill: var(--fg); font-size: 18px; font-weight: 600; }
-    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 12px; }
-    .stat { background: var(--fill); border-radius: 10px; padding: 8px 10px; }
-    .stat b { display: block; font-size: 1.1rem; color: var(--fg); }
-    .stat span { font-size: 0.8rem; color: var(--muted); }
-    footer { margin-top: 1.5rem; font-size: 0.8rem; color: var(--muted); }
-  </style>
+  <title>Geo – Mathe zum Anfassen</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <main>
   <h1>Geo</h1>
-  <p>Testseite: Zieh die Ecken des Dreiecks. Winkel und Fläche werden live berechnet.</p>
+  <p class="lead">Mathe zum Anfassen: Zieh, schieb und probier aus. Wähle ein Kapitel.</p>
 
-  <svg id="board" viewBox="0 0 400 300" aria-label="Dreieck mit verschiebbaren Ecken">
-    <g class="grid" id="grid"></g>
-    <polygon class="tri" id="tri"></polygon>
-    <g id="labels"></g>
-    <g id="points"></g>
-  </svg>
+  <a class="chapter" href="dreieck.html">
+    <h2>Dreieck</h2>
+    <p>Ecken verschieben, Winkel und Fläche live ablesen. Warum ist die Winkelsumme immer 180°?</p>
+    <span class="tag">Geometrie · ab Klasse 7</span>
+  </a>
 
-  <div class="stats">
-    <div class="stat"><span>Winkel α</span><b id="a">–</b></div>
-    <div class="stat"><span>Winkel β</span><b id="b">–</b></div>
-    <div class="stat"><span>Winkel γ</span><b id="c">–</b></div>
-  </div>
-  <div class="stats">
-    <div class="stat"><span>Summe</span><b id="sum">–</b></div>
-    <div class="stat"><span>Fläche (Kästchen)</span><b id="area">–</b></div>
-    <div class="stat"><span>Version</span><b id="ver">0.1</b></div>
-  </div>
+  <a class="chapter" href="potenzen.html">
+    <h2>Potenzen und Wurzeln</h2>
+    <p>Potenzen verstehen, Potenzgesetze entdecken, Quadrat- und Kubikwurzel an Quadrat und Würfel sehen, Zehnerpotenzen, Übungen.</p>
+    <span class="tag">Algebra · Klasse 9 Realschule</span>
+  </a>
 
-  <footer>Stand: Schritt 1 – Testseite.</footer>
+  <footer>Geo · Unterrichtsmaterial zum Ausprobieren</footer>
 </main>
-
-<script>
-  const NS = "http://www.w3.org/2000/svg";
-  const svg = document.getElementById("board");
-  const STEP = 25;
-  const pts = [
-    { x: 75, y: 250, name: "A" },
-    { x: 325, y: 250, name: "B" },
-    { x: 175, y: 75, name: "C" },
-  ];
-
-  // Raster
-  const grid = document.getElementById("grid");
-  for (let x = 0; x <= 400; x += STEP) grid.appendChild(line(x, 0, x, 300));
-  for (let y = 0; y <= 300; y += STEP) grid.appendChild(line(0, y, 400, y));
-  function line(x1, y1, x2, y2) {
-    const l = document.createElementNS(NS, "line");
-    Object.entries({ x1, y1, x2, y2 }).forEach(([k, v]) => l.setAttribute(k, v));
-    return l;
-  }
-
-  const tri = document.getElementById("tri");
-  const labels = document.getElementById("labels");
-  const pointLayer = document.getElementById("points");
-  const circles = pts.map((p, i) => {
-    const c = document.createElementNS(NS, "circle");
-    c.setAttribute("r", 11);
-    c.classList.add("pt");
-    c.addEventListener("pointerdown", (e) => startDrag(e, i));
-    pointLayer.appendChild(c);
-    const t = document.createElementNS(NS, "text");
-    t.classList.add("label");
-    t.textContent = p.name;
-    labels.appendChild(t);
-    return { c, t };
-  });
-
-  let dragging = -1;
-  function toSvg(e) {
-    const r = svg.getBoundingClientRect();
-    return { x: (e.clientX - r.left) * 400 / r.width, y: (e.clientY - r.top) * 300 / r.height };
-  }
-  function startDrag(e, i) {
-    dragging = i;
-    svg.setPointerCapture(e.pointerId);
-    e.preventDefault();
-  }
-  svg.addEventListener("pointermove", (e) => {
-    if (dragging < 0) return;
-    const p = toSvg(e);
-    pts[dragging].x = Math.min(400, Math.max(0, Math.round(p.x / STEP) * STEP));
-    pts[dragging].y = Math.min(300, Math.max(0, Math.round(p.y / STEP) * STEP));
-    draw();
-  });
-  ["pointerup", "pointercancel"].forEach((ev) => svg.addEventListener(ev, () => (dragging = -1)));
-
-  function angleAt(p, q, r) {
-    const v1 = [q.x - p.x, q.y - p.y], v2 = [r.x - p.x, r.y - p.y];
-    const d = Math.hypot(...v1) * Math.hypot(...v2);
-    if (d === 0) return 0;
-    const cos = Math.max(-1, Math.min(1, (v1[0] * v2[0] + v1[1] * v2[1]) / d));
-    return Math.acos(cos) * 180 / Math.PI;
-  }
-
-  function draw() {
-    tri.setAttribute("points", pts.map((p) => `${p.x},${p.y}`).join(" "));
-    const cx = (pts[0].x + pts[1].x + pts[2].x) / 3;
-    const cy = (pts[0].y + pts[1].y + pts[2].y) / 3;
-    pts.forEach((p, i) => {
-      circles[i].c.setAttribute("cx", p.x);
-      circles[i].c.setAttribute("cy", p.y);
-      const dx = p.x - cx, dy = p.y - cy, len = Math.hypot(dx, dy) || 1;
-      circles[i].t.setAttribute("x", p.x + dx / len * 24 - 6);
-      circles[i].t.setAttribute("y", p.y + dy / len * 24 + 6);
-    });
-    const [A, B, C] = pts;
-    const a = angleAt(A, B, C), b = angleAt(B, C, A), c = angleAt(C, A, B);
-    const fmt = (v) => v.toFixed(1).replace(".", ",") + "°";
-    document.getElementById("a").textContent = fmt(a);
-    document.getElementById("b").textContent = fmt(b);
-    document.getElementById("c").textContent = fmt(c);
-    document.getElementById("sum").textContent = fmt(a + b + c);
-    const area = Math.abs((B.x - A.x) * (C.y - A.y) - (C.x - A.x) * (B.y - A.y)) / 2 / (STEP * STEP);
-    document.getElementById("area").textContent = area.toFixed(1).replace(".", ",");
-  }
-  draw();
-</script>
 </body>
 </html>

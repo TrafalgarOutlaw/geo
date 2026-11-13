@@ -1,0 +1,395 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Potenzen und Wurzeln – Geo</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .steps { width: 100%; border-collapse: collapse; margin: 8px 0; font-variant-numeric: tabular-nums; }
+    .steps td { padding: 4px 6px; border-bottom: 1px solid var(--grid); text-align: center; }
+    .steps tr.cur td { background: var(--fill); font-weight: 700; }
+    .steps td.arrow { color: var(--muted); font-size: 0.85rem; }
+    .strike { text-decoration: line-through; opacity: 0.45; }
+    .gridl { stroke: var(--grid); stroke-width: 1; }
+    .sq { fill: var(--fill); stroke: var(--accent); stroke-width: 3; }
+    .face1 { fill: var(--fill); stroke: var(--accent); stroke-width: 2; }
+    .face2 { fill: var(--fill2); stroke: var(--accent2); stroke-width: 2; }
+    .face3 { fill: var(--fill); stroke: var(--accent); stroke-width: 2; opacity: 0.8; }
+    .axis { fill: var(--muted); font-size: 12px; }
+    .dim { fill: var(--fg); font-size: 15px; font-weight: 600; }
+    .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin: 8px 0; }
+    #q { font-size: 1.3rem; font-weight: 600; margin: 8px 0; }
+    nav.toc { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 4px; }
+    nav.toc a { font-size: 0.85rem; text-decoration: none; border: 1px solid var(--grid); border-radius: 999px; padding: 4px 10px; }
+  </style>
+</head>
+<body>
+<main>
+  <a class="back" href="./">← Alle Kapitel</a>
+  <h1>Potenzen und Wurzeln</h1>
+  <p class="lead">Klasse 9 Realschule. Verschieb die Regler und beobachte, was passiert.</p>
+  <nav class="toc">
+    <a href="#potenz">1 Potenz</a><a href="#gesetze">2 Potenzgesetze</a><a href="#wurzel">3 Wurzeln</a>
+    <a href="#wgesetze">4 Wurzelgesetze</a><a href="#zehner">5 Zehnerpotenzen</a><a href="#ueben">6 Üben</a>
+  </nav>
+
+  <!-- 1 -->
+  <section class="card" id="potenz">
+    <h2>1 Was ist eine Potenz?</h2>
+    <p>Eine Potenz <b>a<sup>n</sup></b> ist eine Kurzschreibweise: Die <span class="f1">Basis a</span> wird <span class="f2">n-mal</span> mit sich selbst multipliziert.</p>
+    <label class="slider">Basis a = <b id="pa-v"></b><input type="range" id="pa" min="-5" max="10" value="2"></label>
+    <label class="slider">Exponent n = <b id="pn-v"></b><input type="range" id="pn" min="-4" max="8" value="3"></label>
+    <div class="big" id="p-out"></div>
+    <p class="muted">Von Zeile zu Zeile wird durch a geteilt. So sieht man, warum a<sup>0</sup> = 1 ist und negative Exponenten Brüche ergeben:</p>
+    <table class="steps" id="p-steps"></table>
+  </section>
+
+  <!-- 2 -->
+  <section class="card" id="gesetze">
+    <h2>2 Potenzgesetze</h2>
+    <p>Wähle ein Gesetz. Die Faktoren zeigen, warum es stimmt.</p>
+    <div class="chips" id="law-chips">
+      <button data-law="mul" class="on">a<sup>m</sup>·a<sup>n</sup></button>
+      <button data-law="div">a<sup>m</sup> : a<sup>n</sup></button>
+      <button data-law="pow">(a<sup>m</sup>)<sup>n</sup></button>
+      <button data-law="same">a<sup>n</sup>·b<sup>n</sup></button>
+    </div>
+    <label class="slider" id="m-wrap">m = <b id="lm-v"></b><input type="range" id="lm" min="1" max="6" value="3"></label>
+    <label class="slider">n = <b id="ln-v"></b><input type="range" id="ln" min="1" max="5" value="2"></label>
+    <div class="big" id="law-out" style="font-size:1.1rem"></div>
+    <div class="rule" id="law-rule"></div>
+  </section>
+
+  <!-- 3 -->
+  <section class="card" id="wurzel">
+    <h2>3 Quadratwurzel und Kubikwurzel</h2>
+    <p>Die Quadratwurzel <b>√A</b> ist die Seitenlänge eines Quadrats mit dem Flächeninhalt A. Die Kubikwurzel <b>∛V</b> ist die Kantenlänge eines Würfels mit dem Volumen V.</p>
+    <div class="chips" id="root-chips">
+      <button data-mode="sq" class="on">Quadrat</button>
+      <button data-mode="cube">Würfel</button>
+    </div>
+    <label class="slider"><span id="r-label">Flächeninhalt A</span> = <b id="r-v"></b><input type="range" id="r" min="0" max="100" step="1" value="20"></label>
+    <svg class="board" id="root-svg" viewBox="0 0 340 330" aria-label="Quadrat oder Würfel"></svg>
+    <div class="big" id="r-out"></div>
+    <p class="muted" id="r-hint"></p>
+  </section>
+
+  <!-- 4 -->
+  <section class="card" id="wgesetze">
+    <h2>4 Wurzelgesetze</h2>
+    <div class="rule">√a · √b = √(a·b) &nbsp;&nbsp; z. B. √2 · √8 = √16 = 4</div>
+    <div class="rule">√a : √b = √(a : b) &nbsp;&nbsp; z. B. √75 : √3 = √25 = 5</div>
+    <div class="rule">√(a²) = |a| &nbsp;&nbsp; z. B. √((−3)²) = √9 = 3</div>
+    <div class="rule">Wurzeln als Potenz: √a = a<sup>1/2</sup>, &nbsp;∛a = a<sup>1/3</sup>, &nbsp;<sup>n</sup>√a = a<sup>1/n</sup></div>
+    <div class="rule">Achtung: √(a + b) ≠ √a + √b &nbsp;&nbsp; z. B. √(9 + 16) = 5, aber √9 + √16 = 7</div>
+    <h2 style="margin-top:12px">Teilweise Wurzelziehen</h2>
+    <p>Gib eine Zahl ein. Die größte Quadratzahl wird herausgezogen.</p>
+    <div class="row">√ <input class="answer" id="pz" inputmode="numeric" value="72"></div>
+    <div class="big" id="pz-out"></div>
+  </section>
+
+  <!-- 5 -->
+  <section class="card" id="zehner">
+    <h2>5 Zehnerpotenzen und wissenschaftliche Schreibweise</h2>
+    <p>Sehr große und sehr kleine Zahlen schreibt man als <b>Zahl zwischen 1 und 10 · 10<sup>k</sup></b>.</p>
+    <label class="slider">k = <b id="zk-v"></b><input type="range" id="zk" min="-10" max="12" value="3"></label>
+    <div class="big" id="zk-out"></div>
+    <p class="muted" id="zk-ex"></p>
+    <h2 style="margin-top:12px">Umrechner</h2>
+    <div class="row"><input class="answer" id="sci" inputmode="decimal" value="0,00042" style="width:12em"></div>
+    <div class="big" id="sci-out"></div>
+  </section>
+
+  <!-- 6 -->
+  <section class="card" id="ueben">
+    <h2>6 Üben</h2>
+    <div class="chips" id="ex-chips">
+      <button data-t="all" class="on">Gemischt</button>
+      <button data-t="pot">Potenzen</button>
+      <button data-t="law">Gesetze</button>
+      <button data-t="root">Wurzeln</button>
+      <button data-t="sci">Zehnerpotenzen</button>
+    </div>
+    <div id="q"></div>
+    <div class="row">
+      <input class="answer" id="ans" inputmode="decimal" autocomplete="off" placeholder="Antwort">
+      <button class="btn primary" id="check">Prüfen</button>
+      <button class="btn" id="next">Neue Aufgabe</button>
+    </div>
+    <p id="fb"></p>
+    <p class="muted">Richtig: <b id="score">0</b> von <b id="total">0</b>. Brüche darfst du als 1/8 eingeben, Kommazahlen mit Komma.</p>
+  </section>
+
+  <footer>Geo · Kapitel Potenzen und Wurzeln</footer>
+</main>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const NS = "http://www.w3.org/2000/svg";
+const de = (v, d = 6) => Number(v).toLocaleString("de-DE", { maximumFractionDigits: d }).replace("-", "−");
+const sup = (e) => `<sup>${String(e).replace("-", "−")}</sup>`;
+const neg = (x) => (x < 0 ? `(${String(x).replace("-", "−")})` : String(x));
+const num = (x) => String(x).replace("-", "−");
+function el(tag, attrs, parent) {
+  const e = document.createElementNS(NS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(e);
+  return e;
+}
+function frac(a, n) { // a^n mit n<0 als Bruch
+  const d = Math.pow(a, -n);
+  return d < 0 ? `−1/${de(-d)}` : `1/${de(d)}`;
+}
+
+/* ---------- 1 Potenz ---------- */
+function drawPot() {
+  const a = +$("pa").value, n = +$("pn").value;
+  $("pa-v").textContent = num(a); $("pn-v").textContent = num(n);
+  const A = neg(a);
+  let out;
+  if (a === 0 && n <= 0) out = `0${sup(n)} ist nicht definiert`;
+  else if (n > 0) {
+    const factors = Array(n).fill(`<span class="f1">${A}</span>`).join(" · ");
+    out = `${A}${sup(n)} = ${factors} = ${de(Math.pow(a, n))}`;
+  } else if (n === 0) out = `${A}${sup(0)} = 1`;
+  else {
+    const factors = Array(-n).fill(`<span class="f1">${A}</span>`).join(" · ");
+    out = `${A}${sup(n)} = 1 / (${factors}) = ${frac(a, n)} = ${de(Math.pow(a, n))}`;
+  }
+  $("p-out").innerHTML = out;
+  let rows = "";
+  if (a !== 0) {
+    for (let k = 4; k >= -3; k--) {
+      const v = k >= 0 ? de(Math.pow(a, k)) : `${frac(a, k)} = ${de(Math.pow(a, k))}`;
+      rows += `<tr class="${k === n ? "cur" : ""}"><td>${A}${sup(k)}</td><td>${v}</td><td class="arrow">${k > -3 ? ": " + A + " ↓" : ""}</td></tr>`;
+    }
+  } else rows = `<tr><td>Mit der Basis 0 kann man nicht teilen.</td></tr>`;
+  $("p-steps").innerHTML = rows;
+}
+["pa", "pn"].forEach((id) => $(id).addEventListener("input", drawPot));
+drawPot();
+
+/* ---------- 2 Gesetze ---------- */
+let law = "mul";
+document.querySelectorAll("#law-chips button").forEach((b) => b.addEventListener("click", () => {
+  law = b.dataset.law;
+  document.querySelectorAll("#law-chips button").forEach((x) => x.classList.toggle("on", x === b));
+  drawLaw();
+}));
+function fs(cls, letter, k) { return Array(k).fill(`<span class="${cls}">${letter}</span>`).join("·"); }
+function drawLaw() {
+  let m = +$("lm").value, n = +$("ln").value;
+  $("m-wrap").style.display = law === "same" ? "none" : "";
+  $("lm-v").textContent = m; $("ln-v").textContent = n;
+  let out = "", rule = "";
+  if (law === "mul") {
+    out = `a${sup(m)} · a${sup(n)} = (${fs("f1", "a", m)}) · (${fs("f2", "a", n)}) = a${sup(m + n)}`;
+    rule = "<b>Gleiche Basis multiplizieren:</b> Exponenten addieren. a<sup>m</sup> · a<sup>n</sup> = a<sup>m+n</sup>";
+  } else if (law === "div") {
+    const k = Math.min(m, n);
+    const top = Array(m).fill(0).map((_, i) => `<span class="f1 ${i < k ? "strike" : ""}">a</span>`).join("·");
+    const bot = Array(n).fill(0).map((_, i) => `<span class="f2 ${i < k ? "strike" : ""}">a</span>`).join("·");
+    const r = m - n;
+    const res = r === 0 ? "a<sup>0</sup> = 1" : `a${sup(r)}` + (r < 0 ? ` = 1/a${sup(-r)}` : "");
+    out = `a${sup(m)} : a${sup(n)} = (${top}) / (${bot}) = ${res}`;
+    rule = "<b>Gleiche Basis dividieren:</b> Exponenten subtrahieren. a<sup>m</sup> : a<sup>n</sup> = a<sup>m−n</sup> (a ≠ 0)";
+  } else if (law === "pow") {
+    const groups = Array(n).fill(0).map((_, i) => `(${fs(i % 2 ? "f2" : "f1", "a", m)})`).join(" · ");
+    out = `(a${sup(m)})${sup(n)} = ${groups} = a${sup(m * n)}`;
+    rule = "<b>Potenz potenzieren:</b> Exponenten multiplizieren. (a<sup>m</sup>)<sup>n</sup> = a<sup>m·n</sup>";
+  } else {
+    const pairs = Array(n).fill(`(<span class="f1">a</span>·<span class="f2">b</span>)`).join("·");
+    out = `a${sup(n)} · b${sup(n)} = ${fs("f1", "a", n)} · ${fs("f2", "b", n)} = ${pairs} = (a·b)${sup(n)}`;
+    rule = "<b>Gleicher Exponent:</b> Basen multiplizieren. a<sup>n</sup> · b<sup>n</sup> = (a·b)<sup>n</sup>. Beispiel: 2<sup>3</sup> · 5<sup>3</sup> = 10<sup>3</sup> = 1000";
+  }
+  $("law-out").innerHTML = out; $("law-rule").innerHTML = rule;
+}
+["lm", "ln"].forEach((id) => $(id).addEventListener("input", drawLaw));
+drawLaw();
+
+/* ---------- 3 Wurzeln ---------- */
+let rmode = "sq";
+document.querySelectorAll("#root-chips button").forEach((b) => b.addEventListener("click", () => {
+  rmode = b.dataset.mode;
+  document.querySelectorAll("#root-chips button").forEach((x) => x.classList.toggle("on", x === b));
+  const r = $("r");
+  if (rmode === "sq") { r.max = 100; r.value = 20; $("r-label").textContent = "Flächeninhalt A"; }
+  else { r.max = 125; r.value = 27; $("r-label").textContent = "Volumen V"; }
+  drawRoot();
+}));
+function drawRoot() {
+  const v = +$("r").value, s = $("root-svg");
+  s.innerHTML = "";
+  $("r-v").textContent = v;
+  if (rmode === "sq") {
+    const U = 30, ox = 20, oy = 310, side = Math.sqrt(v);
+    for (let i = 0; i <= 10; i++) {
+      el("line", { x1: ox + i * U, y1: oy, x2: ox + i * U, y2: oy - 10 * U, class: "gridl" }, s);
+      el("line", { x1: ox, y1: oy - i * U, x2: ox + 10 * U, y2: oy - i * U, class: "gridl" }, s);
+      if (i % 2 === 0) el("text", { x: ox + i * U - 4, y: oy + 16, class: "axis" }, s).textContent = i;
+    }
+    el("rect", { x: ox, y: oy - side * U, width: side * U, height: side * U, class: "sq" }, s);
+    if (side > 0.8) el("text", { x: ox + side * U / 2 - 14, y: oy - side * U - 6, class: "dim" }, s).textContent = de(side, 2);
+    const k = Math.floor(side);
+    $("r-out").innerHTML = `√${v} ${Number.isInteger(side) ? "=" : "≈"} ${de(side, 4)}`;
+    $("r-hint").innerHTML = Number.isInteger(side)
+      ? `${v} ist eine Quadratzahl: ${side} · ${side} = ${v}. Die Wurzel ist eine glatte Zahl.`
+      : `${v} liegt zwischen den Quadratzahlen ${k * k} und ${(k + 1) ** 2}, also liegt √${v} zwischen ${k} und ${k + 1}. Probe: ${de(side, 4)} · ${de(side, 4)} ≈ ${de(side * side, 3)}`;
+  } else {
+    const U = 40, side = Math.cbrt(v), L = side * U, dx = 0.5 * L, dy = 0.4 * L;
+    const ox = 30, oy = 310;
+    // Raster am Boden zur Orientierung
+    for (let i = 0; i <= 5; i++) el("text", { x: ox + i * U - 4, y: oy + 16, class: "axis" }, s).textContent = i;
+    el("line", { x1: ox, y1: oy, x2: ox + 5 * U, y2: oy, class: "gridl" }, s);
+    const P = (x, y) => `${x},${y}`;
+    el("polygon", { points: [P(ox, oy - L), P(ox + dx, oy - L - dy), P(ox + L + dx, oy - L - dy), P(ox + L, oy - L)].join(" "), class: "face3" }, s);
+    el("polygon", { points: [P(ox + L, oy), P(ox + L + dx, oy - dy), P(ox + L + dx, oy - L - dy), P(ox + L, oy - L)].join(" "), class: "face2" }, s);
+    el("rect", { x: ox, y: oy - L, width: L, height: L, class: "face1" }, s);
+    for (let i = 1; i < side; i++) {
+      el("line", { x1: ox + i * U, y1: oy, x2: ox + i * U, y2: oy - L, class: "gridl" }, s);
+      el("line", { x1: ox, y1: oy - i * U, x2: ox + L, y2: oy - i * U, class: "gridl" }, s);
+    }
+    if (side > 0.8) el("text", { x: ox + L / 2 - 14, y: oy - L / 2 + 5, class: "dim" }, s).textContent = de(side, 2);
+    const isInt = Math.abs(side - Math.round(side)) < 1e-9;
+    const k = Math.floor(side + 1e-9);
+    $("r-out").innerHTML = `∛${v} ${isInt ? "=" : "≈"} ${de(side, 4)}`;
+    $("r-hint").innerHTML = isInt
+      ? `${v} ist eine Kubikzahl: ${Math.round(side)} · ${Math.round(side)} · ${Math.round(side)} = ${v}.`
+      : `${v} liegt zwischen den Kubikzahlen ${k ** 3} und ${(k + 1) ** 3}, also liegt ∛${v} zwischen ${k} und ${k + 1}.`;
+  }
+}
+$("r").addEventListener("input", drawRoot);
+drawRoot();
+
+/* ---------- 4 Teilweise Wurzelziehen ---------- */
+function drawPz() {
+  const n = parseInt($("pz").value, 10);
+  if (!(n >= 0) || n > 1e9) { $("pz-out").textContent = "Bitte eine ganze Zahl ≥ 0 eingeben."; return; }
+  let best = 1;
+  for (let k = Math.floor(Math.sqrt(n)); k >= 1; k--) if (n % (k * k) === 0) { best = k; break; }
+  const rest = n / (best * best);
+  let out;
+  if (rest === 1) out = `√${n} = ${best}`;
+  else if (best === 1) out = `√${n} lässt sich nicht vereinfachen ≈ ${de(Math.sqrt(n), 4)}`;
+  else out = `√${n} = √(${best * best} · ${rest}) = √${best * best} · √${rest} = ${best}√${rest} ≈ ${de(Math.sqrt(n), 4)}`;
+  $("pz-out").textContent = out;
+}
+$("pz").addEventListener("input", drawPz);
+drawPz();
+
+/* ---------- 5 Zehnerpotenzen ---------- */
+const examples = {
+  "-10": "Durchmesser eines Atoms: etwa 10⁻¹⁰ m",
+  "-9": "1 Nanometer (nm)",
+  "-7": "Größe eines Virus: etwa 10⁻⁷ m",
+  "-6": "1 Mikrometer (µm), Bakterien sind ein paar µm groß",
+  "-3": "1 Millimeter (mm)",
+  "-2": "1 Zentimeter (cm)",
+  "0": "1 Meter",
+  "3": "1 Kilometer (km), auch: kilo = 10³",
+  "6": "mega = 10⁶, z. B. 1 Megabyte",
+  "7": "Erddurchmesser: etwa 1,3 · 10⁷ m",
+  "9": "giga = 10⁹, z. B. 1 Gigabyte; Menschen auf der Erde: etwa 8 · 10⁹",
+  "11": "Abstand Erde–Sonne: etwa 1,5 · 10¹¹ m",
+  "12": "tera = 10¹², z. B. 1 Terabyte",
+};
+function drawZ() {
+  const k = +$("zk").value;
+  $("zk-v").textContent = num(k);
+  let dec;
+  if (k >= 0) dec = "1" + "0".repeat(k);
+  else dec = "0," + "0".repeat(-k - 1) + "1";
+  dec = k >= 0 ? Number(dec).toLocaleString("de-DE") : dec;
+  const word = k > 0 ? `eine 1 mit ${k} Nullen` : k === 0 ? "einfach 1" : `das Komma steht ${-k} Stellen links von der 1`;
+  $("zk-out").innerHTML = `10${sup(k)} = ${dec}`;
+  $("zk-ex").textContent = `${word[0].toUpperCase() + word.slice(1)}. ` + (examples[k] || "");
+}
+$("zk").addEventListener("input", drawZ);
+drawZ();
+
+function parseDe(s) {
+  s = String(s).trim().replace(/\s/g, "").replace(/−/g, "-");
+  const m = s.match(/^(-?\d+)\/(-?\d+)$/);
+  if (m) return +m[1] / +m[2];
+  s = s.replace(/\./g, "").replace(",", ".");
+  if (s === "" || isNaN(+s)) return NaN;
+  return +s;
+}
+function sciParts(x) {
+  if (x === 0) return [0, 0];
+  let k = Math.floor(Math.log10(Math.abs(x)));
+  let m = x / Math.pow(10, k);
+  m = Math.round(m * 1e10) / 1e10;
+  if (Math.abs(m) >= 10) { m /= 10; k++; }
+  return [m, k];
+}
+function drawSci() {
+  const x = parseDe($("sci").value);
+  if (isNaN(x)) { $("sci-out").textContent = "Bitte eine Zahl eingeben, z. B. 0,00042 oder 3500000"; return; }
+  const [m, k] = sciParts(x);
+  $("sci-out").innerHTML = x === 0 ? "0" : `${de(x, 12)} = ${de(m, 8)} · 10${sup(k)}`;
+}
+$("sci").addEventListener("input", drawSci);
+drawSci();
+
+/* ---------- 6 Üben ---------- */
+const R = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
+const pick = (arr) => arr[R(0, arr.length - 1)];
+const gens = {
+  pot() {
+    const t = R(0, 2);
+    if (t === 0) { const a = R(2, 5), n = R(2, a === 2 ? 6 : 3); return { q: `${a}${sup(n)} = ?`, a: Math.pow(a, n) }; }
+    if (t === 1) { const a = R(2, 12); return { q: `${a}${sup(0)} = ?`, a: 1 }; }
+    const a = pick([2, 3, 4, 5, 10]), n = -R(1, a === 2 ? 3 : 2);
+    return { q: `${a}${sup(n)} = ? <span class="muted">(als Bruch oder Kommazahl)</span>`, a: Math.pow(a, n) };
+  },
+  law() {
+    const t = R(0, 2), m = R(2, 7), n = R(2, 5);
+    if (t === 0) return { q: `x${sup(m)} · x${sup(n)} = x<sup>?</sup>`, a: m + n };
+    if (t === 1) return { q: `x${sup(m + n)} : x${sup(n)} = x<sup>?</sup>`, a: m };
+    return { q: `(x${sup(m)})${sup(n)} = x<sup>?</sup>`, a: m * n };
+  },
+  root() {
+    const t = R(0, 2);
+    if (t === 0) { const k = R(2, 15); return { q: `√${k * k} = ?`, a: k }; }
+    if (t === 1) { const k = R(2, 5); return { q: `∛${k ** 3} = ?`, a: k }; }
+    const k = R(2, 9), d = pick([10, 100]);
+    return { q: `√${de((k * k) / (d * d), 6)} = ?`, a: k / d };
+  },
+  sci() {
+    const t = R(0, 1);
+    if (t === 0) { const m = R(11, 99) / 10, k = R(3, 9); return { q: `${de(m * Math.pow(10, k), 0)} = ${de(m)} · 10<sup>?</sup>`, a: k }; }
+    const m = R(11, 99) / 10, k = -R(2, 6);
+    return { q: `${de(m * Math.pow(10, k), 10)} = ${de(m)} · 10<sup>?</sup>`, a: k };
+  },
+};
+let exType = "all", cur = null, score = 0, total = 0, answered = false;
+document.querySelectorAll("#ex-chips button").forEach((b) => b.addEventListener("click", () => {
+  exType = b.dataset.t;
+  document.querySelectorAll("#ex-chips button").forEach((x) => x.classList.toggle("on", x === b));
+  newQ();
+}));
+function newQ() {
+  const t = exType === "all" ? pick(Object.keys(gens)) : exType;
+  cur = gens[t]();
+  answered = false;
+  $("q").innerHTML = cur.q;
+  $("ans").value = ""; $("fb").innerHTML = "";
+}
+function check() {
+  if (!cur) return;
+  const v = parseDe($("ans").value);
+  if (isNaN(v)) { $("fb").innerHTML = `<span class="bad">Bitte eine Zahl eingeben.</span>`; return; }
+  const ok = Math.abs(v - cur.a) < 1e-9 * Math.max(1, Math.abs(cur.a));
+  if (!answered) { total++; if (ok) score++; answered = true; }
+  $("score").textContent = score; $("total").textContent = total;
+  $("fb").innerHTML = ok ? `<span class="ok">Richtig!</span>` : `<span class="bad">Leider falsch.</span> Richtig ist ${de(cur.a, 8)}.`;
+}
+$("check").addEventListener("click", check);
+$("next").addEventListener("click", newQ);
+$("ans").addEventListener("keydown", (e) => { if (e.key === "Enter") { answered ? newQ() : check(); } });
+newQ();
+</script>
+</body>
+</html>
